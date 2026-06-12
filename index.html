@@ -1,201 +1,570 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Neon Island Run 3D — a browser-based neon island runner concept." />
-  <title>Neon Island Run 3D</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Neon Island Run 3D — playable browser runner with neon road, coins, obstacles and mobile controls." />
+  <title>Neon Island Run 3D — Playable Runner</title>
   <style>
     :root {
       --bg: #050716;
+      --panel: rgba(8, 13, 34, .78);
+      --panel-2: rgba(255,255,255,.08);
+      --line: rgba(255,255,255,.16);
       --cyan: #35f5ff;
       --pink: #ff4fd8;
       --lime: #b9ff4f;
       --gold: #ffd36b;
-      --text: #f6fbff;
-      --muted: rgba(246, 251, 255, 0.72);
+      --danger: #ff456b;
+      --text: #f7fbff;
+      --muted: rgba(247,251,255,.72);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); overflow-x: hidden; }
     body {
       min-height: 100vh;
-      margin: 0;
-      color: var(--text);
       background:
-        radial-gradient(circle at 15% 15%, rgba(53,245,255,.22), transparent 28rem),
-        radial-gradient(circle at 85% 18%, rgba(255,79,216,.22), transparent 26rem),
-        linear-gradient(145deg, #050716, #0b1030 48%, #041d32);
-      overflow-x: hidden;
+        radial-gradient(circle at 16% 12%, rgba(53,245,255,.24), transparent 28rem),
+        radial-gradient(circle at 82% 10%, rgba(255,79,216,.2), transparent 26rem),
+        radial-gradient(circle at 50% 120%, rgba(185,255,79,.16), transparent 26rem),
+        linear-gradient(145deg, #050716, #0b1030 50%, #041d32);
     }
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-      background-size: 46px 46px;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
       mask-image: linear-gradient(to bottom, black, transparent 82%);
     }
-    main {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 2rem;
-    }
-    .card {
-      width: min(1040px, 100%);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 34px;
-      padding: clamp(1.4rem, 5vw, 4rem);
-      background: rgba(9, 14, 35, .72);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 30px 90px rgba(0,0,0,.4);
-      display: grid;
-      grid-template-columns: 1fr .9fr;
-      gap: clamp(1.5rem, 5vw, 4rem);
+    .app { width: min(1180px, 100%); margin: 0 auto; padding: clamp(1rem, 3vw, 2rem); position: relative; z-index: 1; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
       align-items: center;
+      margin-bottom: 1rem;
     }
+    .brand { display: flex; flex-direction: column; gap: .2rem; }
     .eyebrow {
+      width: max-content;
+      max-width: 100%;
       display: inline-flex;
-      padding: .55rem .8rem;
+      padding: .52rem .8rem;
       border-radius: 999px;
       background: rgba(53,245,255,.12);
-      border: 1px solid rgba(53,245,255,.3);
+      border: 1px solid rgba(53,245,255,.32);
       color: #bdfcff;
-      font-weight: 850;
+      font-weight: 900;
       letter-spacing: .08em;
       text-transform: uppercase;
-      font-size: .75rem;
+      font-size: .72rem;
     }
-    h1 {
-      margin: 1rem 0 0;
-      font-size: clamp(3.3rem, 9vw, 7.6rem);
-      line-height: .82;
-      letter-spacing: -.08em;
-    }
-    h1 span {
-      color: transparent;
-      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--gold));
-      -webkit-background-clip: text;
-      background-clip: text;
-    }
-    p {
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: clamp(1rem, 2vw, 1.2rem);
-      max-width: 58ch;
-    }
-    .actions, .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .7rem;
-      margin-top: 1.2rem;
-    }
-    a, .tag {
+    h1 { margin: .45rem 0 0; font-size: clamp(2.2rem, 7vw, 5.8rem); line-height: .86; letter-spacing: -.07em; }
+    h1 span { color: transparent; background: linear-gradient(90deg, var(--cyan), var(--pink), var(--gold)); -webkit-background-clip: text; background-clip: text; }
+    .top-actions, .hud, .touch, .modal-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+    a, button {
       color: var(--text);
       text-decoration: none;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+      background: var(--panel-2);
       border-radius: 999px;
-      padding: .72rem 1rem;
-      font-weight: 800;
+      padding: .78rem 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      font: inherit;
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
     }
-    a.primary {
-      color: #050716;
-      background: linear-gradient(135deg, var(--cyan), var(--pink));
-      border: 0;
+    button:hover, a:hover, button:focus-visible, a:focus-visible { border-color: rgba(53,245,255,.65); outline: 2px solid rgba(53,245,255,.45); outline-offset: 3px; }
+    .primary { color: #050716; background: linear-gradient(135deg, var(--cyan), var(--pink)); border: 0; }
+    .game-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 1rem;
+      align-items: stretch;
     }
-    .island {
-      aspect-ratio: 1;
-      border-radius: 34px;
-      position: relative;
+    .stage, .side-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border-radius: 30px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.38);
       overflow: hidden;
-      background: linear-gradient(to bottom, #101d52, #12365e 52%, #04101e);
+    }
+    .stage { position: relative; min-height: min(72vh, 720px); }
+    canvas { display: block; width: 100%; height: min(72vh, 720px); min-height: 520px; touch-action: none; }
+    .hud {
+      position: absolute;
+      top: .9rem;
+      left: .9rem;
+      right: .9rem;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .stat {
+      pointer-events: auto;
+      min-width: 84px;
+      padding: .55rem .7rem;
       border: 1px solid rgba(255,255,255,.14);
-      box-shadow: inset 0 0 70px rgba(53,245,255,.08);
+      border-radius: 18px;
+      background: rgba(0,0,0,.28);
+      box-shadow: inset 0 0 24px rgba(53,245,255,.06);
     }
-    .sun {
+    .stat small { display: block; color: var(--muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .stat strong { display: block; font-size: 1.2rem; }
+    .modal {
       position: absolute;
-      top: 12%;
-      right: 14%;
-      width: 26%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fff7c8, var(--gold), var(--pink));
-      box-shadow: 0 0 70px rgba(255,79,216,.55);
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      background: linear-gradient(to bottom, rgba(5,7,22,.22), rgba(5,7,22,.78));
     }
-    .path {
-      position: absolute;
-      left: 50%;
-      bottom: -8%;
-      width: 62%;
-      height: 72%;
-      transform: translateX(-50%) perspective(420px) rotateX(54deg);
-      border-radius: 26px;
-      background: repeating-linear-gradient(to bottom, rgba(255,79,216,.45) 0 8px, rgba(6,14,35,.95) 8px 44px);
-      border: 3px solid rgba(53,245,255,.65);
-      box-shadow: 0 0 40px rgba(53,245,255,.28);
+    .modal[hidden] { display: none; }
+    .modal-card {
+      width: min(560px, 100%);
+      padding: clamp(1.3rem, 4vw, 2rem);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(7, 11, 30, .88);
+      box-shadow: 0 30px 90px rgba(0,0,0,.5);
     }
-    .runner {
-      position: absolute;
-      left: 50%;
-      bottom: 20%;
-      transform: translateX(-50%);
-      width: 42px;
-      height: 70px;
-      filter: drop-shadow(0 0 18px var(--cyan));
+    .modal-card h2 { margin: 0 0 .65rem; font-size: clamp(2rem, 5vw, 3.4rem); line-height: .9; letter-spacing: -.05em; }
+    .modal-card p { color: var(--muted); line-height: 1.65; margin: 0 0 1rem; }
+    .side-card { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+    .mission { padding: 1rem; border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(255,255,255,.055); }
+    .mission h2, .mission h3 { margin: 0 0 .45rem; }
+    .mission p, .mission li { color: var(--muted); line-height: 1.55; }
+    .mission ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+    .bar { height: 12px; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; }
+    .bar > span { display: block; height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--lime), var(--gold)); transition: width .2s; }
+    .touch { justify-content: center; padding: .85rem; border-top: 1px solid var(--line); background: rgba(0,0,0,.18); }
+    .touch button { min-width: 72px; font-size: 1.2rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    @media (max-width: 920px) {
+      header, .game-shell { grid-template-columns: 1fr; display: grid; }
+      header { align-items: start; }
+      .top-actions { justify-content: start; }
+      .side-card { order: -1; }
+      canvas { min-height: 520px; height: 64vh; }
     }
-    .runner::before, .runner::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--cyan);
+    @media (max-width: 560px) {
+      .app { padding: .7rem; }
+      .stage, .side-card { border-radius: 22px; }
+      .hud { gap: .4rem; }
+      .stat { min-width: 70px; padding: .45rem .55rem; }
+      .stat strong { font-size: 1rem; }
+      a, button { padding: .72rem .88rem; }
+      canvas { min-height: 480px; }
     }
-    .runner::before { width: 30px; height: 30px; border-radius: 50%; top: 0; }
-    .runner::after { width: 32px; height: 42px; border-radius: 12px; bottom: 0; background: #f6fbff; }
-    .orb {
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--lime);
-      box-shadow: 0 0 20px var(--lime);
-      animation: float 2.8s ease-in-out infinite alternate;
-    }
-    .orb.one { left: 24%; bottom: 34%; }
-    .orb.two { right: 22%; bottom: 42%; animation-delay: -.9s; }
-    .orb.three { left: 43%; bottom: 57%; animation-delay: -1.4s; }
-    @keyframes float { to { transform: translateY(-16px); } }
-    @media (max-width: 820px) {
-      .card { grid-template-columns: 1fr; }
-      .island { max-width: 430px; width: 100%; margin: auto; }
-    }
-    @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
   </style>
 </head>
 <body>
-  <main>
-    <section class="card" aria-labelledby="title">
-      <div>
-        <span class="eyebrow">3D runner concept · GitHub Pages ready</span>
-        <h1 id="title">Neon Island <span>Run 3D</span></h1>
-        <p>A neon island runner concept with arcade mood, glowing path, collectibles and mobile-first visual direction. This page fixes the GitHub Pages 404 and gives the project a live entry point.</p>
-        <div class="actions">
-          <a class="primary" href="https://github.com/LaurAndreea10/Neon-Island-Run-3D">View repository</a>
-          <a href="https://laurandreea10.github.io/codepen-portfolio/">Portfolio</a>
-        </div>
-        <div class="tags" aria-label="Project highlights">
-          <span class="tag">Neon UI</span><span class="tag">Arcade</span><span class="tag">Responsive</span><span class="tag">Canvas-ready</span>
-        </div>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <span class="eyebrow" data-i="eyebrow">Playable 3D Runner · GitHub Pages</span>
+        <h1>Neon Island <span>Run 3D</span></h1>
       </div>
-      <div class="island" aria-hidden="true">
-        <div class="sun"></div>
-        <div class="path"></div>
-        <div class="runner"></div>
-        <div class="orb one"></div><div class="orb two"></div><div class="orb three"></div>
-      </div>
-    </section>
-  </main>
+      <nav class="top-actions" aria-label="Project links">
+        <button id="langBtn" type="button">RO | EN</button>
+        <a href="https://github.com/LaurAndreea10/Neon-Island-Run-3D" target="_blank" rel="noopener noreferrer" data-i="repo">GitHub</a>
+        <a href="https://laurandreea10.github.io/codepen-portfolio/" data-i="portfolio">Portofoliu</a>
+      </nav>
+    </header>
+
+    <main class="game-shell">
+      <section class="stage" aria-label="Neon Island Run 3D game area">
+        <canvas id="game" width="960" height="680"></canvas>
+        <div class="hud" aria-label="Game statistics">
+          <div class="stat"><small data-i="score">Scor</small><strong id="score">0</strong></div>
+          <div class="stat"><small data-i="coins">Orbs</small><strong id="coins">0</strong></div>
+          <div class="stat"><small data-i="speed">Viteză</small><strong id="speed">1.0x</strong></div>
+          <div class="stat"><small data-i="best">Best</small><strong id="best">0</strong></div>
+        </div>
+        <div class="modal" id="modal">
+          <div class="modal-card">
+            <span class="eyebrow" data-i="modalEyebrow">Ready to run</span>
+            <h2 data-i="modalTitle">Intră pe insula neon</h2>
+            <p data-i="modalText">Schimbă banda, sari peste obstacole și colectează orburile. Pe desktop folosește ← → și Space. Pe mobil folosește butoanele de jos sau swipe.</p>
+            <div class="modal-actions">
+              <button class="primary" id="startBtn" type="button" data-i="start">Start joc</button>
+              <button id="resetBtn" type="button" data-i="reset">Reset best</button>
+            </div>
+          </div>
+        </div>
+        <div class="touch" aria-label="Mobile controls">
+          <button id="leftBtn" type="button" aria-label="Move left">←</button>
+          <button id="jumpBtn" type="button" aria-label="Jump">⤴</button>
+          <button id="rightBtn" type="button" aria-label="Move right">→</button>
+          <button id="pauseBtn" type="button" aria-label="Pause">Ⅱ</button>
+        </div>
+      </section>
+
+      <aside class="side-card">
+        <section class="mission">
+          <h2 data-i="missionTitle">Misiune</h2>
+          <p data-i="missionText">Ajunge cât mai departe pe traseul insulei neon. Orburile cresc scorul, obstacolele reduc energia.</p>
+          <div class="bar" aria-label="Energy"><span id="energyBar"></span></div>
+        </section>
+        <section class="mission">
+          <h3 data-i="controlsTitle">Control</h3>
+          <ul>
+            <li data-i="control1">← / → sau swipe: schimbă banda</li>
+            <li data-i="control2">Space / ⤴: sari</li>
+            <li data-i="control3">P / Ⅱ: pauză</li>
+          </ul>
+        </section>
+        <section class="mission">
+          <h3 data-i="featuresTitle">Ce include acum</h3>
+          <ul>
+            <li data-i="feature1">Canvas runner jucabil, nu landing page</li>
+            <li data-i="feature2">Drum pseudo-3D cu neon și perspectivă</li>
+            <li data-i="feature3">Obstacole, colectibile, energie și best score</li>
+            <li data-i="feature4">Responsive + touch controls</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+    <p class="sr-only" id="status" aria-live="polite"></p>
+  </div>
+
+  <script>
+    const copy = {
+      ro: {
+        eyebrow: 'Playable 3D Runner · GitHub Pages', repo: 'GitHub', portfolio: 'Portofoliu', score: 'Scor', coins: 'Orbs', speed: 'Viteză', best: 'Best',
+        modalEyebrow: 'Ready to run', modalTitle: 'Intră pe insula neon', modalText: 'Schimbă banda, sari peste obstacole și colectează orburile. Pe desktop folosește ← → și Space. Pe mobil folosește butoanele de jos sau swipe.', start: 'Start joc', reset: 'Reset best',
+        missionTitle: 'Misiune', missionText: 'Ajunge cât mai departe pe traseul insulei neon. Orburile cresc scorul, obstacolele reduc energia.', controlsTitle: 'Control', control1: '← / → sau swipe: schimbă banda', control2: 'Space / ⤴: sari', control3: 'P / Ⅱ: pauză',
+        featuresTitle: 'Ce include acum', feature1: 'Canvas runner jucabil, nu landing page', feature2: 'Drum pseudo-3D cu neon și perspectivă', feature3: 'Obstacole, colectibile, energie și best score', feature4: 'Responsive + touch controls', gameOver: 'Game over', paused: 'Pauză', resume: 'Continuă', startAgain: 'Joacă din nou'
+      },
+      en: {
+        eyebrow: 'Playable 3D Runner · GitHub Pages', repo: 'GitHub', portfolio: 'Portfolio', score: 'Score', coins: 'Orbs', speed: 'Speed', best: 'Best',
+        modalEyebrow: 'Ready to run', modalTitle: 'Enter the neon island', modalText: 'Change lanes, jump over obstacles and collect glowing orbs. On desktop use ← → and Space. On mobile use the bottom buttons or swipe.', start: 'Start game', reset: 'Reset best',
+        missionTitle: 'Mission', missionText: 'Run as far as possible on the neon island path. Orbs increase your score, obstacles reduce your energy.', controlsTitle: 'Controls', control1: '← / → or swipe: change lane', control2: 'Space / ⤴: jump', control3: 'P / Ⅱ: pause',
+        featuresTitle: 'Included now', feature1: 'Playable canvas runner, not a landing page', feature2: 'Pseudo-3D neon road with perspective', feature3: 'Obstacles, collectibles, energy and best score', feature4: 'Responsive + touch controls', gameOver: 'Game over', paused: 'Paused', resume: 'Resume', startAgain: 'Play again'
+      }
+    };
+
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const modal = document.getElementById('modal');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const scoreEl = document.getElementById('score');
+    const coinsEl = document.getElementById('coins');
+    const speedEl = document.getElementById('speed');
+    const bestEl = document.getElementById('best');
+    const energyBar = document.getElementById('energyBar');
+    const statusEl = document.getElementById('status');
+    const modalTitle = document.querySelector('[data-i="modalTitle"]');
+    const modalText = document.querySelector('[data-i="modalText"]');
+
+    let lang = localStorage.getItem('nir3d-lang') || 'ro';
+    let best = Number(localStorage.getItem('nir3d-best') || 0);
+    let raf = 0;
+    let last = 0;
+    let running = false;
+    let paused = false;
+    let gameOver = false;
+    let spawnTimer = 0;
+    let orbTimer = 0;
+    let shake = 0;
+
+    const state = {
+      score: 0,
+      coins: 0,
+      speed: 1,
+      energy: 100,
+      lane: 1,
+      targetLane: 1,
+      jump: 0,
+      jumpVelocity: 0,
+      objects: [],
+      particles: []
+    };
+
+    function t(key) { return copy[lang][key] || copy.ro[key] || key; }
+
+    function applyLang() {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i]').forEach(el => { el.textContent = t(el.dataset.i); });
+      document.getElementById('langBtn').textContent = lang === 'ro' ? 'RO | EN' : 'EN | RO';
+      if (!running || paused || gameOver) {
+        startBtn.textContent = gameOver ? t('startAgain') : paused ? t('resume') : t('start');
+      }
+      draw();
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(640, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(500, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function reset() {
+      state.score = 0; state.coins = 0; state.speed = 1; state.energy = 100;
+      state.lane = 1; state.targetLane = 1; state.jump = 0; state.jumpVelocity = 0;
+      state.objects = []; state.particles = [];
+      spawnTimer = 0; orbTimer = 0; shake = 0; gameOver = false; paused = false;
+      updateHud();
+    }
+
+    function start() {
+      if (gameOver || !running) reset();
+      running = true; paused = false; gameOver = false;
+      modal.hidden = true;
+      last = performance.now();
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(loop);
+      statusEl.textContent = lang === 'ro' ? 'Joc pornit' : 'Game started';
+    }
+
+    function pause() {
+      if (!running || gameOver) return;
+      paused = !paused;
+      if (paused) {
+        modal.hidden = false;
+        modalTitle.textContent = t('paused');
+        modalText.textContent = t('modalText');
+        startBtn.textContent = t('resume');
+      } else {
+        modal.hidden = true;
+        last = performance.now();
+        raf = requestAnimationFrame(loop);
+      }
+    }
+
+    function endGame() {
+      gameOver = true; running = false;
+      best = Math.max(best, Math.floor(state.score));
+      localStorage.setItem('nir3d-best', String(best));
+      updateHud();
+      modal.hidden = false;
+      modalTitle.textContent = t('gameOver');
+      modalText.textContent = lang === 'ro'
+        ? `Scor: ${Math.floor(state.score)} · Orbs: ${state.coins}. Încearcă din nou și schimbă banda mai devreme.`
+        : `Score: ${Math.floor(state.score)} · Orbs: ${state.coins}. Try again and change lanes earlier.`;
+      startBtn.textContent = t('startAgain');
+      statusEl.textContent = t('gameOver');
+    }
+
+    function laneX(lane, yFactor = 1) {
+      const w = canvas.clientWidth;
+      const center = w / 2;
+      const roadHalf = Math.min(w * .35, 330) * yFactor;
+      return center + (lane - 1) * roadHalf * .52;
+    }
+
+    function moveLane(dir) {
+      state.targetLane = Math.max(0, Math.min(2, state.targetLane + dir));
+    }
+
+    function jump() {
+      if (state.jump <= 0.02) state.jumpVelocity = 1.55;
+    }
+
+    function spawn(type) {
+      const lane = Math.floor(Math.random() * 3);
+      state.objects.push({ type, lane, z: 1.02, hit: false, pulse: Math.random() * 6.28 });
+    }
+
+    function burst(x, y, color, count = 14) {
+      for (let i = 0; i < count; i++) {
+        state.particles.push({ x, y, vx: (Math.random() - .5) * 5, vy: (Math.random() - .8) * 5, life: 1, color });
+      }
+    }
+
+    function update(dt) {
+      if (!running || paused || gameOver) return;
+      const seconds = dt / 1000;
+      state.score += seconds * 28 * state.speed;
+      state.speed = Math.min(3.4, 1 + state.score / 720);
+      state.lane += (state.targetLane - state.lane) * Math.min(1, seconds * 10);
+
+      state.jump += state.jumpVelocity * seconds;
+      if (state.jump > 0 || state.jumpVelocity > 0) state.jumpVelocity -= 3.9 * seconds;
+      if (state.jump < 0) { state.jump = 0; state.jumpVelocity = 0; }
+
+      spawnTimer -= seconds * state.speed;
+      orbTimer -= seconds * state.speed;
+      if (spawnTimer <= 0) { spawn('block'); spawnTimer = .72 + Math.random() * .72; }
+      if (orbTimer <= 0) { spawn('orb'); orbTimer = .42 + Math.random() * .52; }
+
+      state.objects.forEach(obj => { obj.z -= seconds * (.26 + state.speed * .085); obj.pulse += seconds * 5; });
+      state.objects = state.objects.filter(obj => obj.z > -.12 && !obj.remove);
+
+      const playerLane = Math.round(state.lane);
+      state.objects.forEach(obj => {
+        if (obj.hit) return;
+        const near = obj.z < .16 && obj.z > .035;
+        if (!near || obj.lane !== playerLane) return;
+        if (obj.type === 'orb') {
+          obj.hit = true; obj.remove = true; state.coins += 1; state.score += 60; burst(projectX(obj), projectY(obj), '#b9ff4f');
+        } else if (state.jump < .45) {
+          obj.hit = true; obj.remove = true; state.energy -= 24; shake = .35; burst(projectX(obj), projectY(obj), '#ff456b', 20);
+          if (state.energy <= 0) endGame();
+        }
+      });
+
+      state.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .12; p.life -= seconds * 1.7; });
+      state.particles = state.particles.filter(p => p.life > 0);
+      shake = Math.max(0, shake - seconds);
+      updateHud();
+    }
+
+    function projectY(obj) {
+      const h = canvas.clientHeight;
+      return h * (.15 + Math.pow(1 - obj.z, 1.85) * .78);
+    }
+
+    function projectX(obj) {
+      const yFactor = .22 + Math.pow(1 - obj.z, 1.35) * .95;
+      return laneX(obj.lane, yFactor);
+    }
+
+    function drawSky(w, h) {
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#111b56'); g.addColorStop(.55, '#0c2952'); g.addColorStop(1, '#040817');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ffd36b'; ctx.shadowColor = '#ff4fd8'; ctx.shadowBlur = 45;
+      ctx.beginPath(); ctx.arc(w * .78, h * .16, Math.min(w,h) * .07, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      for (let i = 0; i < 48; i++) {
+        const x = (i * 97) % w;
+        const y = (i * 53) % Math.floor(h * .42);
+        const r = (i % 4) + 1;
+        ctx.fillStyle = i % 3 ? 'rgba(255,255,255,.55)' : 'rgba(185,255,79,.7)';
+        ctx.beginPath(); ctx.arc(x, y + 18, r * .45, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    function drawRoad(w, h) {
+      const topY = h * .3, bottomY = h * 1.03;
+      const topHalf = w * .11, bottomHalf = Math.min(w * .48, 430);
+      const cx = w / 2;
+      ctx.save();
+      ctx.shadowColor = '#35f5ff'; ctx.shadowBlur = 18;
+      const road = ctx.createLinearGradient(0, topY, 0, bottomY);
+      road.addColorStop(0, 'rgba(12,19,54,.95)'); road.addColorStop(1, 'rgba(5,7,22,.98)');
+      ctx.fillStyle = road;
+      ctx.beginPath(); ctx.moveTo(cx - topHalf, topY); ctx.lineTo(cx + topHalf, topY); ctx.lineTo(cx + bottomHalf, bottomY); ctx.lineTo(cx - bottomHalf, bottomY); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(53,245,255,.78)'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      for (let i = 0; i < 18; i++) {
+        const tLine = ((i / 18 + (state.score * .003 * state.speed)) % 1);
+        const y = topY + Math.pow(tLine, 1.8) * (bottomY - topY);
+        const half = topHalf + Math.pow(tLine, 1.5) * (bottomHalf - topHalf);
+        ctx.strokeStyle = i % 2 ? 'rgba(255,79,216,.72)' : 'rgba(53,245,255,.35)';
+        ctx.lineWidth = 2 + tLine * 5;
+        ctx.beginPath(); ctx.moveTo(cx - half, y); ctx.lineTo(cx + half, y); ctx.stroke();
+      }
+      [-.34, .34].forEach(offset => {
+        ctx.strokeStyle = 'rgba(255,79,216,.44)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx + offset * topHalf, topY); ctx.lineTo(cx + offset * bottomHalf, bottomY); ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawPlayer(w, h) {
+      const x = laneX(state.lane, 1.05);
+      const y = h * .78 - state.jump * 110;
+      ctx.save();
+      ctx.shadowColor = '#35f5ff'; ctx.shadowBlur = 25;
+      ctx.fillStyle = '#35f5ff'; ctx.beginPath(); ctx.arc(x, y - 44, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f7fbff'; roundRect(x - 17, y - 28, 34, 48, 12); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,79,216,.8)'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x - 18, y + 10); ctx.lineTo(x - 34, y + 42); ctx.moveTo(x + 18, y + 10); ctx.lineTo(x + 34, y + 42); ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawObjects() {
+      [...state.objects].sort((a,b) => b.z - a.z).forEach(obj => {
+        const x = projectX(obj), y = projectY(obj);
+        const s = Math.max(.1, 1 - obj.z);
+        const size = 18 + s * 38;
+        ctx.save();
+        if (obj.type === 'orb') {
+          ctx.shadowColor = '#b9ff4f'; ctx.shadowBlur = 22;
+          ctx.fillStyle = '#b9ff4f'; ctx.beginPath(); ctx.arc(x, y, size * .32 + Math.sin(obj.pulse) * 2, 0, Math.PI * 2); ctx.fill();
+        } else {
+          ctx.shadowColor = '#ff456b'; ctx.shadowBlur = 24;
+          ctx.fillStyle = 'rgba(255,69,107,.95)'; roundRect(x - size * .42, y - size * .42, size * .84, size * .84, 10); ctx.fill();
+          ctx.strokeStyle = '#ffd36b'; ctx.lineWidth = 3; ctx.stroke();
+        }
+        ctx.restore();
+      });
+    }
+
+    function drawParticles() {
+      state.particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3 + p.life * 4, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+
+    function draw() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      ctx.save();
+      if (shake > 0) ctx.translate((Math.random() - .5) * 10 * shake, (Math.random() - .5) * 10 * shake);
+      drawSky(w, h); drawRoad(w, h); drawObjects(); drawPlayer(w, h); drawParticles();
+      ctx.restore();
+    }
+
+    function updateHud() {
+      scoreEl.textContent = Math.floor(state.score);
+      coinsEl.textContent = state.coins;
+      speedEl.textContent = state.speed.toFixed(1) + 'x';
+      bestEl.textContent = best;
+      energyBar.style.width = Math.max(0, state.energy) + '%';
+    }
+
+    function loop(now) {
+      const dt = Math.min(42, now - last); last = now;
+      update(dt); draw();
+      if (running && !paused && !gameOver) raf = requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') moveLane(-1);
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') moveLane(1);
+      if (e.key === ' ' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') { e.preventDefault(); jump(); }
+      if (e.key.toLowerCase() === 'p') pause();
+      if (e.key === 'Enter' && modal.hidden === false) start();
+    });
+
+    let touchX = 0, touchY = 0;
+    canvas.addEventListener('touchstart', e => { const t0 = e.changedTouches[0]; touchX = t0.clientX; touchY = t0.clientY; }, { passive: true });
+    canvas.addEventListener('touchend', e => {
+      const t0 = e.changedTouches[0]; const dx = t0.clientX - touchX; const dy = t0.clientY - touchY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 24) moveLane(dx > 0 ? 1 : -1);
+      else if (dy < -20) jump();
+      else if (!running || gameOver) start();
+    }, { passive: true });
+
+    document.getElementById('leftBtn').addEventListener('click', () => moveLane(-1));
+    document.getElementById('rightBtn').addEventListener('click', () => moveLane(1));
+    document.getElementById('jumpBtn').addEventListener('click', jump);
+    document.getElementById('pauseBtn').addEventListener('click', pause);
+    startBtn.addEventListener('click', start);
+    resetBtn.addEventListener('click', () => { best = 0; localStorage.removeItem('nir3d-best'); updateHud(); });
+    document.getElementById('langBtn').addEventListener('click', () => { lang = lang === 'ro' ? 'en' : 'ro'; localStorage.setItem('nir3d-lang', lang); applyLang(); });
+
+    resize(); updateHud(); applyLang();
+  </script>
 </body>
 </html>
