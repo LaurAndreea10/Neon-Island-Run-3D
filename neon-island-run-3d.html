@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Neon Island Run 3D · Complete Arcade Edition</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #050816;
+      --panel: rgba(8, 12, 32, 0.84);
+      --panel-strong: rgba(10, 16, 45, 0.96);
+      --cyan: #77f7ff;
+      --pink: #ff49e1;
+      --gold: #ffe66d;
+      --green: #6dffb8;
+      --red: #ff3864;
+      --text: #ffffff;
+      --muted: #aebbe0;
+      --border: rgba(119, 247, 255, 0.32);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    .hud {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 12px 14px;
+      box-shadow: 0 0 28px rgba(0, 225, 255, 0.16);
+      backdrop-filter: blur(16px);
+    }
+
+    .stats {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stat {
+      min-width: 64px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--cyan);
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .stat strong.combo-hot {
+      color: var(--gold);
+    }
+
+    .mission {
+      width: min(440px, 100%);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .mission strong {
+      color: var(--gold);
+    }
+
+    .mission-bar {
+      margin-top: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.09);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .mission-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--gold));
+      border-radius: inherit;
+      transition: width 0.2s;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(0, 225, 255, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 20%, rgba(255, 73, 225, 0.16), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(255, 230, 109, 0.10), transparent 38%),
+        rgba(2, 4, 14, 0.9);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .card {
+      width: min(980px, 100%);
+      max-height: min(92vh, 820px);
+      overflow: auto;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 24px;
+      box-shadow: 0 0 70px rgba(0, 225, 255, 0.23);
+    }
+
+    .title {
+      font-size: clamp(34px, 7vw, 72px);
+      line-height: 0.95;
+      margin-bottom: 12px;
+      letter-spacing: -0.07em;
+      background: linear-gradient(120deg, var(--cyan), var(--pink), var(--gold));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      color: #d9e8ff;
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #00e1ff, #ff49e1);
+      color: white;
+      font-weight: 850;
+      letter-spacing: 0.035em;
+      cursor: pointer;
+      box-shadow: 0 14px 36px rgba(0, 225, 255, 0.22);
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: none;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .tab {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+      padding: 10px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .tab.active {
+      border-color: var(--cyan);
+      background: rgba(119, 247, 255, 0.16);
+      color: var(--cyan);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .tile {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .tile h3 {
+      margin-bottom: 8px;
+      color: var(--cyan);
+    }
+
+    .tile p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .tile .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .shop-btn,
+    .skin-btn,
+    .mode-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor: pointer;
+      color: white;
+      background: rgba(119, 247, 255, 0.15);
+      border: 1px solid rgba(119, 247, 255, 0.22);
+      font-weight: 800;
+    }
+
+    .shop-btn:disabled,
+    .skin-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .achievement {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: rgba(255, 230, 109, 0.12);
+      border: 1px solid rgba(255, 230, 109, 0.2);
+      font-size: 22px;
+    }
+
+    .achievement.locked {
+      opacity: 0.45;
+    }
+
+    .pause-btn,
+    .mute-btn {
+      pointer-events: auto;
+      border: 1px solid var(--border);
+      background: rgba(8, 12, 32, 0.8);
+      color: white;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 850;
+      backdrop-filter: blur(12px);
+    }
+
+    .utility-actions {
+      position: fixed;
+      right: 16px;
+      bottom: 94px;
+      z-index: 15;
+      display: grid;
+      gap: 8px;
+    }
+
+    .mobile-controls {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 20px;
+      z-index: 15;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .mobile-group {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .mobile-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(8, 12, 32, 0.72);
+      color: white;
+      font-size: 22px;
+      font-weight: 900;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 84px;
+      transform: translateX(-50%);
+      z-index: 30;
+      background: rgba(255, 230, 109, 0.96);
+      color: #141414;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      opacity: 0;
+      transition: 0.25s;
+      pointer-events: none;
+      box-shadow: 0 16px 40px rgba(255, 230, 109, 0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      top: 108px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .kbd {
+      display: inline-flex;
+      min-width: 26px;
+      justify-content: center;
+      padding: 2px 7px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.09);
+      color: white;
+      font-weight: 800;
+    }
+
+    .result-big {
+      font-size: clamp(30px, 6vw, 56px);
+      background: linear-gradient(120deg, var(--cyan), var(--gold));
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .hud {
+        flex-direction: column;
+      }
+
+      .stats {
+        justify-content: space-between;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .utility-actions {
+        bottom: 92px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hud">
+    <div class="panel stats">
+      <div class="stat"><span data-i18n="hud.mode">Mod</span> <strong id="modeHud">Story</strong></div>
+      <div class="stat"><span data-i18n="hud.score">Scor</span> <strong id="score">0</strong></div>
+      <div class="stat"><span data-i18n="hud.crystals">Cristale</span> <strong id="coins">0</strong></div>
+      <div class="stat"><span data-i18n="hud.combo">Combo</span> <strong id="comboHud">0</strong></div>
+      <div class="stat"><span data-i18n="hud.lives">Vieți</span> <strong id="lives">3</strong></div>
+      <div class="stat"><span data-i18n="hud.shield">Shield</span> <strong id="shieldHud">0</strong></div>
+      <div class="stat"><span data-i18n="hud.speed">Viteză</span> <strong id="speed">1x</strong></div>
+      <div class="stat"><span data-i18n="hud.time">Timp</span> <strong id="timeHud">0s</strong></div>
+      <div class="stat"><span data-i18n="hud.high">Record</span> <strong id="highHud">0</strong></div>
+    </div>
+
+    <div class="panel mission">
+      <strong id="missionLabel">Misiune:</strong>
+      <span id="missionText">Colectează 10 cristale.</span>
+      <div class="mission-bar">
+        <div class="mission-fill" id="missionFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="utility-actions">
+    <button class="pause-btn" id="pauseBtn">Pauză</button>
+    <button class="mute-btn" id="muteBtn">Sunet ON</button>
+    <button class="mute-btn" id="langBtn">EN</button>
+  </div>
+
+  <div class="toast" id="toast">Boost activ!</div>
+
+  <div class="overlay" id="menu">
+    <div class="card">
+      <h1 class="title" id="mainTitle">Neon Island Run 3D</h1>
+      <p class="subtitle" id="mainSubtitle">
+        Complete Arcade Edition: runner 3D cu moduri de joc, shop, skin-uri, achievements,
+        boss, power-up-uri, combo, progres salvat și control mobil.
+      </p>
+
+      <div class="top-actions">
+        <button class="btn" id="quickStartBtn">START RAPID</button>
+        <button class="btn secondary" id="resetSaveBtn">Reset progres</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="modes" id="tabBtnModes">Moduri</button>
+        <button class="tab" data-tab="shop" id="tabBtnShop">Shop</button>
+        <button class="tab" data-tab="skins" id="tabBtnSkins">Skin-uri</button>
+        <button class="tab" data-tab="achievements" id="tabBtnAchievements">Achievements</button>
+        <button class="tab" data-tab="settings" id="tabBtnSettings">Control</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-modes"></div>
+
+      <div class="tab-panel" id="tab-shop">
+        <p class="small" style="margin-bottom:12px;">
+          <span id="shopIntro">Cristale totale salvate</span>:
+          <strong id="bankCoins">0</strong>.
+          <span id="shopNote">Upgrade-urile se aplică automat la fiecare cursă.</span>
+        </p>
+
+        <div class="grid" id="shopGrid"></div>
+      </div>
+
+      <div class="tab-panel" id="tab-skins">
+        <p class="small" style="margin-bottom:12px;" id="skinsIntro">
+          Alege look-ul personajului. Unele skin-uri cer cristale.
+        </p>
+
+        <div class="grid" id="skinGrid"></div>
+      </div>
+
+      <div class="tab-panel" id="tab-achievements">
+        <div class="grid" id="achievementGrid"></div>
+      </div>
+
+      <div class="tab-panel" id="tab-settings"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="pauseOverlay">
+    <div class="card">
+      <h2 class="result-big" id="pauseTitle">Pauză</h2>
+      <p class="subtitle" id="pauseSubtitle">Cursa este oprită temporar.</p>
+      <div class="top-actions">
+        <button class="btn" id="resumeBtn">Continuă</button>
+        <button class="btn secondary" id="backToMenuBtn">Meniu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="gameOver">
+    <div class="card">
+      <h2 class="result-big" id="resultTitle">Game Over</h2>
+      <p class="subtitle" id="finalText">Scor final: 0</p>
+      <div class="top-actions">
+        <button class="btn" id="restartBtn">Restart</button>
+        <button class="btn secondary" id="menuBtn">Meniu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mobile-controls">
+    <div class="mobile-group">
+      <button class="mobile-btn" id="leftBtn">←</button>
+      <button class="mobile-btn" id="rightBtn">→</button>
+    </div>
+    <div class="mobile-group">
+      <button class="mobile-btn" id="jumpBtn">↑</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+  <script>
+    let scene, camera, renderer, clock;
+    let player, board, body, boss;
+    let gameRunning = false;
+    let paused = false;
+
+    // score is kept as float and displayed with Math.floor()
+    // (the old version did Math.floor(42 * delta) which was almost always 0)
+    let score = 0;
+    let runCoins = 0;
+    let lives = 3;
+    let shield = 0;
+    let speed = 0.32;
+    let baseSpeed = 0.32;
+    let lane = 1;
+    let targetX = 0;
+    let isJumping = false;
+    let jumpVelocity = 0;
+    let runTime = 0;
+    let activeMode = "story";
+    let bossHealth = 100;
+    let hitlessTime = 0;
+    let usedBoosts = 0;
+    let obstaclesDodged = 0;
+    let combo = 0;
+    let bestCombo = 0;
+    let doubleScoreTimer = 0;
+    let magnetTimer = 0;
+    let slowMotionTimer = 0;
+    let shieldTimer = 0;
+    let superJumpTimer = 0;
+
+    const CAMERA_BASE = { x: 0, y: 7, z: 12 };
+
+    const lanePositions = [-3, 0, 3];
+    const obstacles = [];
+    const collectibles = [];
+    const platforms = [];
+    const particles = [];
+    const trail = [];
+
+    const scoreEl = document.getElementById("score");
+    const coinsEl = document.getElementById("coins");
+    const livesEl = document.getElementById("lives");
+    const shieldHud = document.getElementById("shieldHud");
+    const speedEl = document.getElementById("speed");
+    const timeHud = document.getElementById("timeHud");
+    const modeHud = document.getElementById("modeHud");
+    const comboHud = document.getElementById("comboHud");
+    const highHud = document.getElementById("highHud");
+    const missionText = document.getElementById("missionText");
+    const missionFill = document.getElementById("missionFill");
+    const toast = document.getElementById("toast");
+
+    const menu = document.getElementById("menu");
+    const pauseOverlay = document.getElementById("pauseOverlay");
+    const gameOver = document.getElementById("gameOver");
+    const finalText = document.getElementById("finalText");
+    const resultTitle = document.getElementById("resultTitle");
+
+    const shopGrid = document.getElementById("shopGrid");
+    const skinGrid = document.getElementById("skinGrid");
+    const achievementGrid = document.getElementById("achievementGrid");
+    const bankCoinsEl = document.getElementById("bankCoins");
+
+    const defaultSave = {
+      bankCoins: 0,
+      highScore: 0,
+      totalRuns: 0,
+      totalCoins: 0,
+      bestTime: 0,
+      bestCombo: 0,
+      selectedSkin: "blue",
+      upgrades: {
+        shield: 0,
+        magnet: 0,
+        doubleScore: 0,
+        slowMotion: 0,
+        superJump: 0
+      },
+      unlockedSkins: ["blue"],
+      achievements: {}
+    };
+
+    let save = loadSave();
+
+    const skinData = {
+      blue: {
+        name: "Neon Blue",
+        cost: 0,
+        body: 0x77f7ff,
+        board: 0xff49e1,
+        glow: 0x00e1ff
+      },
+      cyberPink: {
+        name: "Cyber Pink",
+        cost: 60,
+        body: 0xff49e1,
+        board: 0x77f7ff,
+        glow: 0xff49e1
+      },
+      gold: {
+        name: "Gold Runner",
+        cost: 120,
+        body: 0xffe66d,
+        board: 0xff8a00,
+        glow: 0xffe66d
+      },
+      beach: {
+        name: "Beach Mode",
+        cost: 160,
+        body: 0x6dffb8,
+        board: 0x00aaff,
+        glow: 0x6dffb8
+      },
+      phantom: {
+        name: "Dark Phantom",
+        cost: 220,
+        body: 0x9999ff,
+        board: 0x222244,
+        glow: 0x9999ff
+      }
+    };
+
+    const shopData = {
+      shield: {
+        name: "Shield",
+        icon: "🛡️",
+        descriptionRo: "Începi cursa cu protecție extra.",
+        descriptionEn: "Start each run with extra protection.",
+        baseCost: 40,
+        max: 5
+      },
+      magnet: {
+        name: "Magnet",
+        icon: "🧲",
+        descriptionRo: "Atrage cristalele din apropiere.",
+        descriptionEn: "Attract nearby crystals.",
+        baseCost: 50,
+        max: 5
+      },
+      doubleScore: {
+        name: "Double Score",
+        icon: "✨",
+        descriptionRo: "Crește șansa de punctaj dublu.",
+        descriptionEn: "Increases your double score advantage.",
+        baseCost: 60,
+        max: 5
+      },
+      slowMotion: {
+        name: "Slow Motion",
+        icon: "🌀",
+        descriptionRo: "Încetinește jocul la momente critice.",
+        descriptionEn: "Slows the game during critical moments.",
+        baseCost: 70,
+        max: 5
+      },
+      superJump: {
+        name: "Super Jump",
+        icon: "🚀",
+        descriptionRo: "Salt mai înalt și mai sigur.",
+        descriptionEn: "Higher and safer jumps.",
+        baseCost: 55,
+        max: 5
+      }
+    };
+
+    const achievementData = {
+      firstRun: {
+        icon: "🎮",
+        name: "First Run",
+        descriptionRo: "Începe prima cursă.",
+        descriptionEn: "Start your first run."
+      },
+      crystalHunter: {
+        icon: "💎",
+        name: "Crystal Hunter",
+        descriptionRo: "Colectează 50 cristale total.",
+        descriptionEn: "Collect 50 total crystals."
+      },
+      survivor: {
+        icon: "⏱️",
+        name: "Survivor",
+        descriptionRo: "Rezistă 90 secunde într-o cursă.",
+        descriptionEn: "Survive 90 seconds in one run."
+      },
+      noHit: {
+        icon: "🕊️",
+        name: "No Hit",
+        descriptionRo: "Rezistă 30 secunde fără impact.",
+        descriptionEn: "Survive 30 seconds without a hit."
+      },
+      booster: {
+        icon: "⚡",
+        name: "Booster",
+        descriptionRo: "Folosește 5 boost-uri.",
+        descriptionEn: "Use 5 boosts."
+      },
+      speedDemon: {
+        icon: "🔥",
+        name: "Speed Demon",
+        descriptionRo: "Ajungi la 2x viteză.",
+        descriptionEn: "Reach 2x speed."
+      },
+      comboMaster: {
+        icon: "🎯",
+        name: "Combo Master",
+        descriptionRo: "Atinge combo x15 fără impact.",
+        descriptionEn: "Reach a x15 combo without getting hit."
+      },
+      bossBreaker: {
+        icon: "👾",
+        name: "Boss Breaker",
+        descriptionRo: "Învinge boss-ul în Boss Mode.",
+        descriptionEn: "Defeat the boss in Boss Mode."
+      },
+      richRunner: {
+        icon: "👑",
+        name: "Rich Runner",
+        descriptionRo: "Strânge 200 cristale totale.",
+        descriptionEn: "Collect 200 total crystals."
+      }
+    };
+
+    let currentLang = localStorage.getItem("neonIslandRun3DLang") || "ro";
+
+    const i18n = {
+      ro: {
+        quickStart: "START RAPID",
+        resetProgress: "Reset progres",
+        pause: "Pauză",
+        pauseTitle: "Pauză",
+        pauseSubtitle: "Cursa este oprită temporar.",
+        resume: "Continuă",
+        menu: "Meniu",
+        restart: "Restart",
+        soundOn: "Sunet ON",
+        soundOff: "Sunet OFF",
+        languageButton: "EN",
+
+        title: "Neon Island Run 3D",
+        subtitle:
+          "Complete Arcade Edition: runner 3D cu moduri de joc, shop, skin-uri, achievements, boss, power-up-uri, combo, progres salvat și control mobil.",
+
+        tabs: {
+          modes: "Moduri",
+          shop: "Shop",
+          skins: "Skin-uri",
+          achievements: "Achievements",
+          settings: "Control"
+        },
+
+        hud: {
+          mode: "Mod",
+          score: "Scor",
+          crystals: "Cristale",
+          combo: "Combo",
+          lives: "Vieți",
+          shield: "Shield",
+          speed: "Viteză",
+          time: "Timp",
+          high: "Record",
+          mission: "Misiune"
+        },
+
+        modes: {
+          story: {
+            name: "Story Mode",
+            desc: "Capitole progresive: tutorial, obstacole, viteză, boss.",
+            meta1: "Balanced",
+            meta2: "3 vieți",
+            btn: "Joacă Story"
+          },
+          endless: {
+            name: "Endless Mode",
+            desc: "Runner infinit. Scopul este recordul maxim.",
+            meta1: "High Score",
+            meta2: "Infinit",
+            btn: "Joacă Endless"
+          },
+          time: {
+            name: "Time Attack",
+            desc: "Ai 75 secunde să strângi cât mai multe cristale.",
+            meta1: "75s",
+            meta2: "Rapid",
+            btn: "Joacă Time Attack"
+          },
+          challenge: {
+            name: "Challenge Mode",
+            desc: "Misiune specială: supraviețuiește fără multe greșeli.",
+            meta1: "Hard",
+            meta2: "Skill",
+            btn: "Joacă Challenge"
+          },
+          boss: {
+            name: "Boss Mode",
+            desc: "Cristalele și boost-urile scad energia boss-ului. Atacă prin colectare!",
+            meta1: "Boss",
+            meta2: "Epic",
+            btn: "Joacă Boss"
+          }
+        },
+
+        shopIntro: "Cristale totale salvate",
+        shopNote: "Upgrade-urile se aplică automat la fiecare cursă.",
+        skinsIntro: "Alege look-ul personajului. Unele skin-uri cer cristale.",
+
+        shop: {
+          level: "Level",
+          max: "MAX",
+          buy: "Cumpără upgrade",
+          maxed: "Maxim",
+          crystals: "cristale"
+        },
+
+        skins: {
+          unlocked: "Deblocat",
+          active: "Activ",
+          selected: "Selectat",
+          select: "Selectează",
+          unlock: "Deblochează",
+          cosmetic: "Skin cosmetic pentru runner și hoverboard.",
+          crystals: "cristale"
+        },
+
+        settings: {
+          desktop: "Desktop",
+          desktopDesc: "mișcare, Space salt, P pauză, M sunet.",
+          mobile: "Mobil",
+          mobileDesc:
+            "Butoane pe ecran pentru stânga/dreapta/salt. Poți folosi și swipe stânga/dreapta.",
+          portfolio: "Portofoliu",
+          portfolioDesc:
+            "Proiect 3D cu Three.js, localStorage, UI arcade, misiuni, progres, achievements și efecte vizuale."
+        },
+
+        missions: {
+          story1: count => `Story 1/3: colectează 10 cristale. Progres: ${count}/10.`,
+          story2: score => `Story 2/3: ajungi la 3500 scor. Progres: ${score}/3500.`,
+          story3: "Story 3/3: colectează 25 cristale și 6000 scor.",
+          endless: high => `Endless: bate recordul. High score: ${high}.`,
+          time: left => `Time Attack: ${left} secunde rămase. Strânge cât mai mult scor.`,
+          challenge: count => `Challenge: evită 45 obstacole. Progres: ${count}/45.`,
+          boss: hp => `Boss Mode: colectează cristale ca să scazi energia boss-ului. HP Boss: ${hp}%.`
+        },
+
+        toast: {
+          reset: "Progres resetat.",
+          active: mode => `${mode} activ!`,
+          shieldBlocked: "Shield a blocat impactul!",
+          slowMotion: "Slow Motion activ!",
+          boost: "Boost + Double Score!",
+          magnet: "Magnet activ!",
+          shieldPlus: "Shield +1!",
+          superJump: "Super Jump activ!",
+          bossAttack: "Boss attack!",
+          bossHit: damage => `Boss lovit! -${damage} HP`,
+          combo: count => `Combo x${count}!`,
+          achievement: name => `Achievement: ${name}`,
+          skinActive: name => `${name} activ!`,
+          upgrade: name => `${name} upgrade!`
+        },
+
+        results: {
+          gameOver: "Game Over",
+          bossDefeated: "Boss învins!",
+          timeComplete: "Time Attack complet!",
+          storyComplete: "Story complet!",
+          challengeComplete: "Challenge complet!",
+          final: (score, coins, time, high, combo) =>
+            `Scor: ${score} · Cristale cursă: ${coins} · Timp: ${time}s · Combo max: x${combo} · High Score: ${high}`
+        },
+
+        labels: {
+          story: "Story",
+          endless: "Endless",
+          time: "Time Attack",
+          challenge: "Challenge",
+          boss: "Boss"
+        }
+      },
+
+      en: {
+        quickStart: "QUICK START",
+        resetProgress: "Reset progress",
+        pause: "Pause",
+        pauseTitle: "Pause",
+        pauseSubtitle: "The run is temporarily stopped.",
+        resume: "Resume",
+        menu: "Menu",
+        restart: "Restart",
+        soundOn: "Sound ON",
+        soundOff: "Sound OFF",
+        languageButton: "RO",
+
+        title: "Neon Island Run 3D",
+        subtitle:
+          "Complete Arcade Edition: a 3D runner with game modes, shop, skins, achievements, boss mode, power-ups, combos, saved progress and mobile controls.",
+
+        tabs: {
+          modes: "Modes",
+          shop: "Shop",
+          skins: "Skins",
+          achievements: "Achievements",
+          settings: "Controls"
+        },
+
+        hud: {
+          mode: "Mode",
+          score: "Score",
+          crystals: "Crystals",
+          combo: "Combo",
+          lives: "Lives",
+          shield: "Shield",
+          speed: "Speed",
+          time: "Time",
+          high: "Best",
+          mission: "Mission"
+        },
+
+        modes: {
+          story: {
+            name: "Story Mode",
+            desc: "Progressive chapters: tutorial, obstacles, speed and boss.",
+            meta1: "Balanced",
+            meta2: "3 lives",
+            btn: "Play Story"
+          },
+          endless: {
+            name: "Endless Mode",
+            desc: "Infinite runner. Your goal is to beat the high score.",
+            meta1: "High Score",
+            meta2: "Infinite",
+            btn: "Play Endless"
+          },
+          time: {
+            name: "Time Attack",
+            desc: "You have 75 seconds to collect as many crystals as possible.",
+            meta1: "75s",
+            meta2: "Fast",
+            btn: "Play Time Attack"
+          },
+          challenge: {
+            name: "Challenge Mode",
+            desc: "Special mission: survive with as few mistakes as possible.",
+            meta1: "Hard",
+            meta2: "Skill",
+            btn: "Play Challenge"
+          },
+          boss: {
+            name: "Boss Mode",
+            desc: "Crystals and boosts drain the boss energy. Attack by collecting!",
+            meta1: "Boss",
+            meta2: "Epic",
+            btn: "Play Boss"
+          }
+        },
+
+        shopIntro: "Saved total crystals",
+        shopNote: "Upgrades are applied automatically at the start of each run.",
+        skinsIntro: "Choose your character look. Some skins require crystals.",
+
+        shop: {
+          level: "Level",
+          max: "MAX",
+          buy: "Buy upgrade",
+          maxed: "Maxed",
+          crystals: "crystals"
+        },
+
+        skins: {
+          unlocked: "Unlocked",
+          active: "Active",
+          selected: "Selected",
+          select: "Select",
+          unlock: "Unlock",
+          cosmetic: "Cosmetic skin for the runner and hoverboard.",
+          crystals: "crystals"
+        },
+
+        settings: {
+          desktop: "Desktop",
+          desktopDesc: "move, Space jump, P pause, M sound.",
+          mobile: "Mobile",
+          mobileDesc:
+            "Use the on-screen buttons for left/right/jump. You can also swipe left or right.",
+          portfolio: "Portfolio",
+          portfolioDesc:
+            "3D project with Three.js, localStorage, arcade UI, missions, progress, achievements and visual effects."
+        },
+
+        missions: {
+          story1: count => `Story 1/3: collect 10 crystals. Progress: ${count}/10.`,
+          story2: score => `Story 2/3: reach 3500 score. Progress: ${score}/3500.`,
+          story3: "Story 3/3: collect 25 crystals and reach 6000 score.",
+          endless: high => `Endless: beat the record. High score: ${high}.`,
+          time: left => `Time Attack: ${left} seconds left. Get the highest score possible.`,
+          challenge: count => `Challenge: dodge 45 obstacles. Progress: ${count}/45.`,
+          boss: hp => `Boss Mode: collect crystals to drain the boss energy. Boss HP: ${hp}%.`
+        },
+
+        toast: {
+          reset: "Progress reset.",
+          active: mode => `${mode} active!`,
+          shieldBlocked: "Shield blocked the hit!",
+          slowMotion: "Slow Motion active!",
+          boost: "Boost + Double Score!",
+          magnet: "Magnet active!",
+          shieldPlus: "Shield +1!",
+          superJump: "Super Jump active!",
+          bossAttack: "Boss attack!",
+          bossHit: damage => `Boss hit! -${damage} HP`,
+          combo: count => `Combo x${count}!`,
+          achievement: name => `Achievement: ${name}`,
+          skinActive: name => `${name} active!`,
+          upgrade: name => `${name} upgraded!`
+        },
+
+        results: {
+          gameOver: "Game Over",
+          bossDefeated: "Boss defeated!",
+          timeComplete: "Time Attack complete!",
+          storyComplete: "Story complete!",
+          challengeComplete: "Challenge complete!",
+          final: (score, coins, time, high, combo) =>
+            `Score: ${score} · Run crystals: ${coins} · Time: ${time}s · Max combo: x${combo} · High Score: ${high}`
+        },
+
+        labels: {
+          story: "Story",
+          endless: "Endless",
+          time: "Time Attack",
+          challenge: "Challenge",
+          boss: "Boss"
+        }
+      }
+    };
+
+    function t() {
+      return i18n[currentLang];
+    }
+
+    let audioCtx = null;
+    let muted = false;
+
+    init();
+
+    function loadSave() {
+      try {
+        const raw = localStorage.getItem("neonIslandRun3DCompleteSave");
+        if (!raw) return structuredClone(defaultSave);
+
+        const parsed = JSON.parse(raw);
+        const merged = structuredClone(defaultSave);
+
+        Object.assign(merged, parsed);
+
+        // deep-merge: save-urile vechi nu pierd cheile noi de upgrade
+        merged.upgrades = {
+          ...structuredClone(defaultSave.upgrades),
+          ...(parsed.upgrades || {})
+        };
+        merged.unlockedSkins = Array.from(
+          new Set(["blue", ...(parsed.unlockedSkins || [])])
+        );
+        merged.achievements = { ...(parsed.achievements || {}) };
+
+        return merged;
+      } catch {
+        return structuredClone(defaultSave);
+      }
+    }
+
+    function persistSave() {
+      localStorage.setItem("neonIslandRun3DCompleteSave", JSON.stringify(save));
+    }
+
+    function init() {
+      scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x050816, 18, 68);
+
+      camera = new THREE.PerspectiveCamera(
+        70,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(CAMERA_BASE.x, CAMERA_BASE.y, CAMERA_BASE.z);
+      camera.lookAt(0, 1, -8);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      document.body.appendChild(renderer.domElement);
+
+      clock = new THREE.Clock();
+
+      createLights();
+      createWorld();
+      createPlayer();
+      createBoss();
+      bindControls();
+      applyLanguage();
+      updateMenuInfo();
+      updateHUD();
+
+      animate();
+    }
+
+    function createLights() {
+      scene.add(new THREE.AmbientLight(0x99ccff, 0.68));
+
+      const main = new THREE.DirectionalLight(0xffffff, 1.45);
+      main.position.set(6, 10, 6);
+      scene.add(main);
+
+      const neon1 = new THREE.PointLight(0x00e1ff, 2.1, 40);
+      neon1.position.set(-6, 5, 4);
+      scene.add(neon1);
+
+      const neon2 = new THREE.PointLight(0xff49e1, 2.1, 40);
+      neon2.position.set(6, 5, -12);
+      scene.add(neon2);
+    }
+
+    function createWorld() {
+      const skyGeo = new THREE.SphereGeometry(120, 32, 32);
+      const skyMat = new THREE.MeshBasicMaterial({
+        color: 0x080a24,
+        side: THREE.BackSide
+      });
+      scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+      for (let i = 0; i < 80; i++) createStar();
+
+      for (let i = 0; i < 20; i++) createPlatform(i * -8);
+
+      for (let i = 0; i < 16; i++) {
+        spawnObstacle(-20 - i * 13);
+        spawnCollectible(-14 - i * 9);
+      }
+    }
+
+    function createStar() {
+      const geo = new THREE.SphereGeometry(Math.random() * 0.08 + 0.025, 8, 8);
+      const mat = new THREE.MeshBasicMaterial({
+        color: Math.random() > 0.5 ? 0x77f7ff : 0xff6bd6
+      });
+
+      const star = new THREE.Mesh(geo, mat);
+      star.position.set(
+        (Math.random() - 0.5) * 82,
+        Math.random() * 24 + 6,
+        -Math.random() * 110
+      );
+
+      scene.add(star);
+    }
+
+    function createPlatform(z) {
+      const geo = new THREE.BoxGeometry(11, 0.6, 7);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x111935,
+        roughness: 0.35,
+        metalness: 0.25,
+        emissive: 0x061c2f,
+        emissiveIntensity: 0.38
+      });
+
+      const platform = new THREE.Mesh(geo, mat);
+      platform.position.set(0, -0.35, z);
+      scene.add(platform);
+
+      const edgeGeo = new THREE.BoxGeometry(11.4, 0.08, 0.12);
+      const edgeMat = new THREE.MeshBasicMaterial({ color: 0x00e1ff });
+
+      const edge1 = new THREE.Mesh(edgeGeo, edgeMat);
+      edge1.position.set(0, 0.02, z + 3.4);
+      scene.add(edge1);
+
+      const edge2 = new THREE.Mesh(edgeGeo, edgeMat);
+      edge2.position.set(0, 0.02, z - 3.4);
+      scene.add(edge2);
+
+      platforms.push({ platform, edge1, edge2 });
+    }
+
+    function createPlayer() {
+      const skin = skinData[save.selectedSkin] || skinData.blue;
+
+      const group = new THREE.Group();
+
+      const bodyGeo = new THREE.CapsuleGeometry(0.55, 1.15, 8, 16);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: skin.body,
+        emissive: skin.glow,
+        emissiveIntensity: 0.35,
+        roughness: 0.25,
+        metalness: 0.25
+      });
+
+      body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 1.1;
+      group.add(body);
+
+      const visorGeo = new THREE.BoxGeometry(0.8, 0.18, 0.08);
+      const visorMat = new THREE.MeshBasicMaterial({ color: 0xffe66d });
+      const visor = new THREE.Mesh(visorGeo, visorMat);
+      visor.position.set(0, 1.45, 0.45);
+      group.add(visor);
+
+      const boardGeo = new THREE.BoxGeometry(1.7, 0.12, 0.8);
+      const boardMat = new THREE.MeshStandardMaterial({
+        color: skin.board,
+        emissive: skin.board,
+        emissiveIntensity: 0.48
+      });
+
+      board = new THREE.Mesh(boardGeo, boardMat);
+      board.position.y = 0.25;
+      group.add(board);
+
+      player = group;
+      player.position.set(0, 0, 3);
+      scene.add(player);
+    }
+
+    function applySkin() {
+      const skin = skinData[save.selectedSkin] || skinData.blue;
+      body.material.color.setHex(skin.body);
+      body.material.emissive.setHex(skin.glow);
+      board.material.color.setHex(skin.board);
+      board.material.emissive.setHex(skin.board);
+
+      // trail-ul preia culoarea noului skin
+      trail.forEach(dot => dot.material.color.setHex(skin.glow));
+    }
+
+    function createBoss() {
+      const group = new THREE.Group();
+
+      const headGeo = new THREE.IcosahedronGeometry(1.4, 1);
+      const headMat = new THREE.MeshStandardMaterial({
+        color: 0xff3864,
+        emissive: 0x7a001f,
+        emissiveIntensity: 0.8,
+        roughness: 0.25,
+        metalness: 0.35
+      });
+
+      const head = new THREE.Mesh(headGeo, headMat);
+      group.add(head);
+
+      const ringGeo = new THREE.TorusGeometry(1.8, 0.08, 12, 48);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xffe66d });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      group.add(ring);
+
+      boss = group;
+      boss.position.set(0, 5, -44);
+      boss.visible = false;
+      scene.add(boss);
+    }
+
+    function spawnObstacle(z) {
+      const roll = Math.random();
+
+      let geo;
+      if (roll < 0.38) {
+        geo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+      } else if (roll < 0.68) {
+        geo = new THREE.ConeGeometry(0.9, 1.8, 5);
+      } else if (roll < 0.9) {
+        geo = new THREE.TorusGeometry(0.75, 0.22, 12, 24);
+      } else {
+        geo = new THREE.BoxGeometry(2.8, 0.32, 1.2);
+      }
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xff3864,
+        emissive: 0x7a001f,
+        emissiveIntensity: 0.82,
+        roughness: 0.3,
+        metalness: 0.2
+      });
+
+      const obstacle = new THREE.Mesh(geo, mat);
+      obstacle.position.set(randomLaneX(), 0.8, z);
+      obstacle.userData.passed = false;
+      scene.add(obstacle);
+      obstacles.push(obstacle);
+    }
+
+    function spawnCollectible(z) {
+      const roll = Math.random();
+
+      let type = "coin";
+      if (roll < 0.12) type = "boost";
+      if (roll > 0.88) type = "power";
+
+      const geo = type === "boost"
+        ? new THREE.IcosahedronGeometry(0.55, 0)
+        : type === "power"
+          ? new THREE.TetrahedronGeometry(0.62, 0)
+          : new THREE.OctahedronGeometry(0.45, 0);
+
+      const color = type === "boost" ? 0xffe66d : type === "power" ? 0x6dffb8 : 0x00e1ff;
+
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 0.85,
+        roughness: 0.2,
+        metalness: 0.6
+      });
+
+      const item = new THREE.Mesh(geo, mat);
+      item.position.set(randomLaneX(), 1.2, z);
+      item.userData.type = type;
+      scene.add(item);
+      collectibles.push(item);
+    }
+
+    function randomLaneX() {
+      return lanePositions[Math.floor(Math.random() * 3)];
+    }
+
+    // lane-urile libere în jurul unei poziții z (fereastră de ±5 unități)
+    function freeLanesAt(z, self) {
+      return lanePositions.filter(x =>
+        !obstacles.some(o =>
+          o !== self &&
+          Math.abs(o.position.z - z) < 5 &&
+          o.position.x === x
+        )
+      );
+    }
+
+    function bindControls() {
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+
+          tab.classList.add("active");
+          document.getElementById("tab-" + tab.dataset.tab).classList.add("active");
+        });
+      });
+
+      document.getElementById("quickStartBtn").addEventListener("click", () => startGame("story"));
+      document.getElementById("restartBtn").addEventListener("click", () => startGame(activeMode));
+      document.getElementById("menuBtn").addEventListener("click", showMenu);
+      document.getElementById("backToMenuBtn").addEventListener("click", showMenu);
+      document.getElementById("resumeBtn").addEventListener("click", togglePause);
+      document.getElementById("pauseBtn").addEventListener("click", togglePause);
+      document.getElementById("muteBtn").addEventListener("click", toggleMute);
+
+      document.getElementById("langBtn").addEventListener("click", () => {
+        currentLang = currentLang === "ro" ? "en" : "ro";
+        localStorage.setItem("neonIslandRun3DLang", currentLang);
+        applyLanguage();
+        showToast(currentLang === "ro" ? "Limba: Română" : "Language: English");
+      });
+
+      document.getElementById("resetSaveBtn").addEventListener("click", () => {
+        save = structuredClone(defaultSave);
+        persistSave();
+        applyLanguage();
+        updateMenuInfo();
+        showToast(t().toast.reset);
+      });
+
+      document.getElementById("leftBtn").addEventListener("pointerdown", moveLeft);
+      document.getElementById("rightBtn").addEventListener("pointerdown", moveRight);
+      document.getElementById("jumpBtn").addEventListener("pointerdown", jump);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() === "p") togglePause();
+        if (e.key.toLowerCase() === "m") toggleMute();
+
+        if (!gameRunning || paused) return;
+
+        // previne re-activarea butoanelor focusate cu Space
+        // și scroll-ul implicit pe tastele de joc
+        if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+          e.preventDefault();
+        }
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+          document.activeElement.blur();
+        }
+
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") moveLeft();
+        if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") moveRight();
+        if (e.code === "Space" || e.key === "ArrowUp" || e.key.toLowerCase() === "w") jump();
+      });
+
+      let startX = 0;
+      window.addEventListener("pointerdown", e => {
+        startX = e.clientX;
+      });
+
+      window.addEventListener("pointerup", e => {
+        if (!gameRunning || paused) return;
+        const diff = e.clientX - startX;
+        if (Math.abs(diff) > 45) diff > 0 ? moveRight() : moveLeft();
+      });
+
+      // pauză automată când utilizatorul schimbă tab-ul / minimizează
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && gameRunning && !paused) togglePause();
+      });
+
+      window.addEventListener("resize", onResize);
+    }
+
+    function applyLanguage() {
+      const lang = t();
+
+      document.documentElement.lang = currentLang;
+
+      document.getElementById("quickStartBtn").textContent = lang.quickStart;
+      document.getElementById("resetSaveBtn").textContent = lang.resetProgress;
+      document.getElementById("pauseBtn").textContent = lang.pause;
+      document.getElementById("resumeBtn").textContent = lang.resume;
+      document.getElementById("backToMenuBtn").textContent = lang.menu;
+      document.getElementById("menuBtn").textContent = lang.menu;
+      document.getElementById("restartBtn").textContent = lang.restart;
+      document.getElementById("langBtn").textContent = lang.languageButton;
+      document.getElementById("muteBtn").textContent = muted ? lang.soundOff : lang.soundOn;
+
+      document.getElementById("mainTitle").textContent = lang.title;
+      document.getElementById("mainSubtitle").textContent = lang.subtitle;
+
+      document.getElementById("tabBtnModes").textContent = lang.tabs.modes;
+      document.getElementById("tabBtnShop").textContent = lang.tabs.shop;
+      document.getElementById("tabBtnSkins").textContent = lang.tabs.skins;
+      document.getElementById("tabBtnAchievements").textContent = lang.tabs.achievements;
+      document.getElementById("tabBtnSettings").textContent = lang.tabs.settings;
+
+      document.querySelector('[data-i18n="hud.mode"]').textContent = lang.hud.mode;
+      document.querySelector('[data-i18n="hud.score"]').textContent = lang.hud.score;
+      document.querySelector('[data-i18n="hud.crystals"]').textContent = lang.hud.crystals;
+      document.querySelector('[data-i18n="hud.combo"]').textContent = lang.hud.combo;
+      document.querySelector('[data-i18n="hud.lives"]').textContent = lang.hud.lives;
+      document.querySelector('[data-i18n="hud.shield"]').textContent = lang.hud.shield;
+      document.querySelector('[data-i18n="hud.speed"]').textContent = lang.hud.speed;
+      document.querySelector('[data-i18n="hud.time"]').textContent = lang.hud.time;
+      document.querySelector('[data-i18n="hud.high"]').textContent = lang.hud.high;
+
+      document.getElementById("missionLabel").textContent = lang.hud.mission + ":";
+      document.getElementById("shopIntro").textContent = lang.shopIntro;
+      document.getElementById("shopNote").textContent = lang.shopNote;
+      document.getElementById("skinsIntro").textContent = lang.skinsIntro;
+      document.getElementById("pauseTitle").textContent = lang.pauseTitle;
+      document.getElementById("pauseSubtitle").textContent = lang.pauseSubtitle;
+
+      renderModes();
+      renderShop();
+      renderSkins();
+      renderAchievements();
+      renderSettingsPanel();
+      updateMission();
+      updateHUD();
+    }
+
+    function renderModes() {
+      const lang = t();
+
+      const modesPanel = document.getElementById("tab-modes");
+
+      modesPanel.innerHTML = `
+        <div class="grid">
+          ${["story", "endless", "time", "challenge", "boss"].map(mode => `
+            <div class="tile">
+              <h3>${lang.modes[mode].name}</h3>
+              <p>${lang.modes[mode].desc}</p>
+              <div class="meta">
+                <span>${lang.modes[mode].meta1}</span>
+                <span>${lang.modes[mode].meta2}</span>
+              </div>
+              <button class="mode-btn" data-mode="${mode}">
+                ${lang.modes[mode].btn}
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => startGame(btn.dataset.mode));
+      });
+    }
+
+    function renderShop() {
+      const lang = t();
+      shopGrid.innerHTML = "";
+
+      Object.entries(shopData).forEach(([key, item]) => {
+        const level = save.upgrades[key] || 0;
+        const cost = item.baseCost * (level + 1);
+        const maxed = level >= item.max;
+        const description = currentLang === "ro" ? item.descriptionRo : item.descriptionEn;
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `
+          <h3>${item.icon} ${item.name}</h3>
+          <p>${description}</p>
+          <div class="meta">
+            <span>${lang.shop.level} ${level}/${item.max}</span>
+            <span>${maxed ? lang.shop.max : cost + " " + lang.shop.crystals}</span>
+          </div>
+          <button class="shop-btn" ${maxed || save.bankCoins < cost ? "disabled" : ""}>
+            ${maxed ? lang.shop.maxed : lang.shop.buy}
+          </button>
+        `;
+
+        tile.querySelector("button").addEventListener("click", () => {
+          if (save.bankCoins < cost || maxed) return;
+
+          save.bankCoins -= cost;
+          save.upgrades[key]++;
+          persistSave();
+          renderShop();
+          updateMenuInfo();
+          showToast(lang.toast.upgrade(item.name));
+          playTone(620, 0.08, "triangle");
+        });
+
+        shopGrid.appendChild(tile);
+      });
+    }
+
+    function renderSkins() {
+      const lang = t();
+      skinGrid.innerHTML = "";
+
+      Object.entries(skinData).forEach(([key, skin]) => {
+        const owned = save.unlockedSkins.includes(key);
+        const selected = save.selectedSkin === key;
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `
+          <h3>${skin.name}</h3>
+          <p>${lang.skins.cosmetic}</p>
+          <div class="meta">
+            <span>${owned ? lang.skins.unlocked : skin.cost + " " + lang.skins.crystals}</span>
+            <span>${selected ? lang.skins.active : ""}</span>
+          </div>
+          <button class="skin-btn" ${!owned && save.bankCoins < skin.cost ? "disabled" : ""}>
+            ${selected ? lang.skins.selected : owned ? lang.skins.select : lang.skins.unlock}
+          </button>
+        `;
+
+        tile.querySelector("button").addEventListener("click", () => {
+          if (!owned) {
+            if (save.bankCoins < skin.cost) return;
+
+            save.bankCoins -= skin.cost;
+            save.unlockedSkins.push(key);
+          }
+
+          save.selectedSkin = key;
+          persistSave();
+          applySkin();
+          renderSkins();
+          updateMenuInfo();
+          showToast(lang.toast.skinActive(skin.name));
+        });
+
+        skinGrid.appendChild(tile);
+      });
+    }
+
+    function renderAchievements() {
+      achievementGrid.innerHTML = "";
+
+      Object.entries(achievementData).forEach(([key, item]) => {
+        const unlocked = !!save.achievements[key];
+        const description = currentLang === "ro" ? item.descriptionRo : item.descriptionEn;
+
+        const tile = document.createElement("div");
+        tile.className = "tile achievement " + (unlocked ? "" : "locked");
+        tile.innerHTML = `
+          <div class="badge">${unlocked ? item.icon : "🔒"}</div>
+          <div>
+            <h3>${item.name}</h3>
+            <p>${description}</p>
+          </div>
+        `;
+
+        achievementGrid.appendChild(tile);
+      });
+    }
+
+    function renderSettingsPanel() {
+      const lang = t();
+
+      document.getElementById("tab-settings").innerHTML = `
+        <div class="grid">
+          <div class="tile">
+            <h3>${lang.settings.desktop}</h3>
+            <p>
+              <span class="kbd">←</span> <span class="kbd">→</span>
+              ${lang.settings.desktopDesc}
+            </p>
+          </div>
+
+          <div class="tile">
+            <h3>${lang.settings.mobile}</h3>
+            <p>${lang.settings.mobileDesc}</p>
+          </div>
+
+          <div class="tile">
+            <h3>${lang.settings.portfolio}</h3>
+            <p>${lang.settings.portfolioDesc}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function startGame(mode) {
+      unlockAchievement("firstRun");
+
+      activeMode = mode;
+      menu.classList.add("hidden");
+      gameOver.classList.add("hidden");
+      pauseOverlay.classList.add("hidden");
+
+      resetRun();
+      gameRunning = true;
+      paused = false;
+
+      save.totalRuns++;
+      persistSave();
+
+      playTone(240, 0.08, "triangle");
+      setTimeout(() => playTone(420, 0.1, "triangle"), 90);
+      showToast(t().toast.active(modeLabel(mode)));
+    }
+
+    function resetRun() {
+      score = 0;
+      runCoins = 0;
+      lives = activeMode === "challenge" ? 2 : 3;
+      shield = save.upgrades.shield;
+      speed = baseSpeed;
+      lane = 1;
+      targetX = 0;
+      runTime = 0;
+      bossHealth = 100;
+      hitlessTime = 0;
+      usedBoosts = 0;
+      obstaclesDodged = 0;
+      combo = 0;
+      bestCombo = 0;
+
+      doubleScoreTimer = save.upgrades.doubleScore * 1.3;
+      magnetTimer = save.upgrades.magnet * 1.6;
+      slowMotionTimer = 0;
+      shieldTimer = save.upgrades.shield * 1.5;
+      superJumpTimer = save.upgrades.superJump * 1.5;
+
+      isJumping = false;
+      jumpVelocity = 0;
+
+      player.position.set(0, 0, 3);
+      player.rotation.set(0, 0, 0);
+
+      camera.position.set(CAMERA_BASE.x, CAMERA_BASE.y, CAMERA_BASE.z);
+
+      boss.visible = activeMode === "boss";
+      boss.position.set(0, 5, -44);
+
+      obstacles.forEach(o => {
+        o.position.z = -20 - Math.random() * 120;
+        o.position.x = randomLaneX();
+        o.userData.passed = false;
+        o.scale.set(1, 1, 1);
+      });
+
+      collectibles.forEach(c => {
+        c.position.z = -14 - Math.random() * 110;
+        c.position.x = randomLaneX();
+        setCollectibleType(c);
+      });
+
+      clearParticles();
+      applySkin();
+      updateHUD();
+    }
+
+    function modeLabel(mode) {
+      return t().labels[mode] || t().labels.story;
+    }
+
+    function showMenu() {
+      gameRunning = false;
+      paused = false;
+      menu.classList.remove("hidden");
+      gameOver.classList.add("hidden");
+      pauseOverlay.classList.add("hidden");
+      updateMenuInfo();
+      applyLanguage();
+    }
+
+    function togglePause() {
+      if (!gameRunning) return;
+
+      paused = !paused;
+      pauseOverlay.classList.toggle("hidden", !paused);
+      playTone(paused ? 180 : 320, 0.08, "sine");
+    }
+
+    function toggleMute() {
+      muted = !muted;
+      document.getElementById("muteBtn").textContent = muted ? t().soundOff : t().soundOn;
+    }
+
+    function moveLeft() {
+      lane = Math.max(0, lane - 1);
+      targetX = lanePositions[lane];
+      playTone(180, 0.035, "sine");
+    }
+
+    function moveRight() {
+      lane = Math.min(2, lane + 1);
+      targetX = lanePositions[lane];
+      playTone(200, 0.035, "sine");
+    }
+
+    function jump() {
+      if (isJumping) return;
+
+      isJumping = true;
+      jumpVelocity = superJumpTimer > 0 ? 0.3 : 0.235;
+      playTone(520, 0.06, "triangle");
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // clamp: după revenirea din tab inactiv, delta nu sare brusc
+      const delta = Math.min(clock.getDelta(), 0.1);
+
+      if (gameRunning && !paused) {
+        updateGame(delta);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function updateGame(delta) {
+      // factor de normalizare: jocul rulează identic la 60 / 120 / 144 Hz
+      const frame = Math.min(delta * 60, 2.5);
+
+      runTime += delta;
+      hitlessTime += delta;
+
+      const effectiveSpeed = (slowMotionTimer > 0 ? speed * 0.68 : speed) * frame;
+
+      score += 42 * delta * (speed / baseSpeed) * (doubleScoreTimer > 0 ? 2 : 1);
+
+      player.position.x += (targetX - player.position.x) * Math.min(0.18 * frame, 1);
+
+      if (isJumping) {
+        player.position.y += jumpVelocity * frame;
+        jumpVelocity -= 0.012 * frame;
+
+        if (player.position.y <= 0) {
+          player.position.y = 0;
+          isJumping = false;
+          jumpVelocity = 0;
+        }
+      }
+
+      player.rotation.z = (targetX - player.position.x) * -0.08;
+      player.rotation.y = Math.sin(Date.now() * 0.006) * 0.04;
+
+      updatePlatforms(effectiveSpeed);
+      updateObstacles(effectiveSpeed, frame);
+      updateCollectibles(effectiveSpeed, frame);
+      updateTrail();
+      updateParticles(frame);
+      updateTimers(delta);
+      updateBoss(delta, frame);
+      updateDifficulty(delta);
+      updateMission();
+      checkModeEnd();
+
+      if (hitlessTime >= 30) unlockAchievement("noHit");
+      if (runTime >= 90) unlockAchievement("survivor");
+      if (speed / baseSpeed >= 2) unlockAchievement("speedDemon");
+      if (usedBoosts >= 5) unlockAchievement("booster");
+      if (combo >= 15) unlockAchievement("comboMaster");
+
+      updateHUD();
+    }
+
+    function updatePlatforms(effectiveSpeed) {
+      platforms.forEach(obj => {
+        obj.platform.position.z += effectiveSpeed;
+        obj.edge1.position.z += effectiveSpeed;
+        obj.edge2.position.z += effectiveSpeed;
+
+        obj.edge1.material.color.setHex(Date.now() % 900 < 450 ? 0x00e1ff : 0xff49e1);
+
+        if (obj.platform.position.z > 10) {
+          const minZ = Math.min(...platforms.map(p => p.platform.position.z));
+          obj.platform.position.z = minZ - 8;
+          obj.edge1.position.z = obj.platform.position.z + 3.4;
+          obj.edge2.position.z = obj.platform.position.z - 3.4;
+        }
+      });
+    }
+
+    function updateObstacles(effectiveSpeed, frame) {
+      obstacles.forEach(obstacle => {
+        obstacle.position.z += effectiveSpeed;
+        obstacle.rotation.x += 0.025 * frame;
+        obstacle.rotation.y += 0.035 * frame;
+
+        if (!obstacle.userData.passed && obstacle.position.z > player.position.z + 1.2) {
+          obstacle.userData.passed = true;
+          obstaclesDodged++;
+        }
+
+        if (obstacle.position.z > 9) {
+          resetObstacle(obstacle);
+        }
+
+        if (checkCollision(player, obstacle, 0.95)) {
+          loseLife(obstacle);
+        }
+      });
+    }
+
+    function resetObstacle(obstacle) {
+      let z = -120 - Math.random() * 40;
+      let free = freeLanesAt(z, obstacle);
+
+      // fair play: nu blocăm niciodată toate cele 3 lane-uri în aceeași fereastră
+      if (free.length <= 1) {
+        z -= 10;
+        free = freeLanesAt(z, obstacle);
+      }
+
+      obstacle.position.z = z;
+      obstacle.position.x = free.length
+        ? free[Math.floor(Math.random() * free.length)]
+        : randomLaneX();
+      obstacle.userData.passed = false;
+
+      if (activeMode === "boss" && Math.random() < 0.28) {
+        obstacle.scale.set(1.35, 1.35, 1.35);
+      } else {
+        obstacle.scale.set(1, 1, 1);
+      }
+    }
+
+    function updateCollectibles(effectiveSpeed, frame) {
+      collectibles.forEach(item => {
+        item.position.z += effectiveSpeed;
+        item.rotation.y += 0.06 * frame;
+        item.rotation.x += 0.035 * frame;
+        item.position.y = 1.25 + Math.sin(Date.now() * 0.005 + item.position.z) * 0.18;
+
+        if (magnetTimer > 0 && item.position.z > -8 && item.position.z < 6) {
+          item.position.x += (player.position.x - item.position.x) * Math.min(0.06 * frame, 1);
+          item.position.y += ((player.position.y + 1.2) - item.position.y) * Math.min(0.035 * frame, 1);
+        }
+
+        if (item.position.z > 9) {
+          resetCollectible(item);
+        }
+
+        if (checkCollision(player, item, 1.08)) {
+          collectItem(item);
+        }
+      });
+    }
+
+    function resetCollectible(item) {
+      item.position.z = -115 - Math.random() * 45;
+      item.position.x = randomLaneX();
+      setCollectibleType(item);
+    }
+
+    function setCollectibleType(item) {
+      const roll = Math.random();
+
+      item.userData.type = "coin";
+      if (roll < 0.13) item.userData.type = "boost";
+      if (roll > 0.9) item.userData.type = "power";
+
+      const color = item.userData.type === "boost"
+        ? 0xffe66d
+        : item.userData.type === "power"
+          ? 0x6dffb8
+          : 0x00e1ff;
+
+      item.material.color.setHex(color);
+      item.material.emissive.setHex(color);
+    }
+
+    function updateTrail() {
+      if (trail.length < 22) {
+        const geo = new THREE.SphereGeometry(0.08, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({
+          color: skinData[save.selectedSkin]?.glow || 0x00e1ff,
+          transparent: true,
+          opacity: 0.55
+        });
+        const dot = new THREE.Mesh(geo, mat);
+        scene.add(dot);
+        trail.push(dot);
+      }
+
+      for (let i = trail.length - 1; i > 0; i--) {
+        trail[i].position.copy(trail[i - 1].position);
+        trail[i].material.opacity = Math.max(0.03, 0.55 - i * 0.025);
+        trail[i].scale.setScalar(Math.max(0.2, 1 - i * 0.035));
+      }
+
+      if (trail[0]) {
+        trail[0].position.set(player.position.x, player.position.y + 0.35, player.position.z + 0.85);
+      }
+    }
+
+    function updateTimers(delta) {
+      doubleScoreTimer = Math.max(0, doubleScoreTimer - delta);
+      magnetTimer = Math.max(0, magnetTimer - delta);
+      slowMotionTimer = Math.max(0, slowMotionTimer - delta);
+      shieldTimer = Math.max(0, shieldTimer - delta);
+      superJumpTimer = Math.max(0, superJumpTimer - delta);
+    }
+
+    function updateBoss(delta, frame) {
+      if (activeMode !== "boss") return;
+
+      boss.visible = true;
+      boss.rotation.x += 0.01 * frame;
+      boss.rotation.y += 0.02 * frame;
+      boss.position.x = Math.sin(runTime * 1.2) * 2.2;
+      boss.position.y = 5 + Math.sin(runTime * 2.1) * 0.4;
+
+      if (Math.floor(runTime) % 7 === 0 && Math.random() < 0.035 * frame) {
+        const nearest = obstacles[Math.floor(Math.random() * obstacles.length)];
+        if (nearest) {
+          nearest.position.z = -36;
+          nearest.position.x = randomLaneX();
+          nearest.scale.set(1.6, 1.6, 1.6);
+          showToast(t().toast.bossAttack);
+          playTone(110, 0.18, "sawtooth");
+        }
+      }
+
+      // drenare pasivă lentă: lupta se câștigă activ, prin colectare
+      bossHealth -= delta * 0.9;
+
+      if (bossHealth <= 0) {
+        unlockAchievement("bossBreaker");
+        endGame(true, t().results.bossDefeated);
+      }
+    }
+
+    function damageBoss(amount) {
+      if (activeMode !== "boss") return;
+
+      bossHealth = Math.max(0, bossHealth - amount);
+      createBurst(boss.position, 0xffe66d);
+      showToast(t().toast.bossHit(amount));
+      playTone(440, 0.07, "square");
+    }
+
+    function updateDifficulty(delta) {
+      let multiplier = 1;
+
+      if (activeMode === "challenge") multiplier = 1.35;
+      if (activeMode === "boss") multiplier = 1.25;
+      if (activeMode === "time") multiplier = 1.15;
+
+      speed += delta * 0.006 * multiplier;
+    }
+
+    function checkModeEnd() {
+      const lang = t();
+
+      if (activeMode === "time" && runTime >= 75) {
+        endGame(true, lang.results.timeComplete);
+      }
+
+      if (activeMode === "story" && score >= 6000 && runCoins >= 25) {
+        endGame(true, lang.results.storyComplete);
+      }
+
+      if (activeMode === "challenge" && obstaclesDodged >= 45) {
+        endGame(true, lang.results.challengeComplete);
+      }
+    }
+
+    function checkCollision(a, b, distance) {
+      const dx = a.position.x - b.position.x;
+      const dy = a.position.y + 0.9 - b.position.y;
+      const dz = a.position.z - b.position.z;
+
+      return Math.sqrt(dx * dx + dy * dy + dz * dz) < distance;
+    }
+
+    function loseLife(obstacle) {
+      if (shield > 0 || shieldTimer > 0) {
+        if (shield > 0) shield--;
+        shieldTimer = 0;
+        showToast(t().toast.shieldBlocked);
+        playTone(320, 0.08, "square");
+        createBurst(obstacle.position, 0x77f7ff);
+        resetObstacle(obstacle);
+        return;
+      }
+
+      lives--;
+      hitlessTime = 0;
+      combo = 0;
+      createBurst(obstacle.position, 0xff3864);
+      resetObstacle(obstacle);
+      cameraShake();
+      playTone(90, 0.18, "sawtooth");
+
+      if (save.upgrades.slowMotion > 0 && Math.random() < 0.18 + save.upgrades.slowMotion * 0.07) {
+        slowMotionTimer = 2.4;
+        showToast(t().toast.slowMotion);
+      }
+
+      if (lives <= 0) {
+        endGame(false, t().results.gameOver);
+      }
+    }
+
+    function collectItem(item) {
+      const type = item.userData.type;
+
+      if (type === "coin") {
+        runCoins++;
+        combo++;
+        bestCombo = Math.max(bestCombo, combo);
+
+        const base = 100 + combo * 8;
+        score += doubleScoreTimer > 0 ? base * 2 : base;
+
+        if (combo > 0 && combo % 5 === 0) {
+          showToast(t().toast.combo(combo));
+        }
+
+        damageBoss(3);
+        createBurst(item.position, 0x00e1ff);
+        playTone(660 + Math.min(combo, 20) * 12, 0.05, "triangle");
+      }
+
+      if (type === "boost") {
+        usedBoosts++;
+        score += doubleScoreTimer > 0 ? 500 : 250;
+        speed += 0.08;
+        doubleScoreTimer = Math.max(doubleScoreTimer, 3 + save.upgrades.doubleScore);
+        showToast(t().toast.boost);
+        damageBoss(8);
+        createBurst(item.position, 0xffe66d);
+        playTone(880, 0.08, "triangle");
+      }
+
+      if (type === "power") {
+        const power = Math.random();
+        if (power < 0.34) {
+          magnetTimer = 5 + save.upgrades.magnet;
+          showToast(t().toast.magnet);
+        } else if (power < 0.67) {
+          shield++;
+          showToast(t().toast.shieldPlus);
+        } else {
+          superJumpTimer = 5 + save.upgrades.superJump;
+          showToast(t().toast.superJump);
+        }
+
+        score += 180;
+        damageBoss(5);
+        createBurst(item.position, 0x6dffb8);
+        playTone(740, 0.08, "sine");
+      }
+
+      resetCollectible(item);
+    }
+
+    function createBurst(position, color) {
+      for (let i = 0; i < 16; i++) {
+        const geo = new THREE.SphereGeometry(0.06, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color });
+        const mesh = new THREE.Mesh(geo, mat);
+
+        mesh.position.copy(position);
+        scene.add(mesh);
+
+        particles.push({
+          mesh,
+          velocity: new THREE.Vector3(
+            (Math.random() - 0.5) * 0.22,
+            Math.random() * 0.18,
+            (Math.random() - 0.5) * 0.22
+          ),
+          life: 1
+        });
+      }
+    }
+
+    function updateParticles(frame = 1) {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.mesh.position.addScaledVector(p.velocity, frame);
+        p.velocity.y -= 0.006 * frame;
+        p.life -= 0.03 * frame;
+        p.mesh.scale.setScalar(Math.max(p.life, 0.01));
+
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          particles.splice(i, 1);
+        }
+      }
+    }
+
+    function clearParticles() {
+      particles.forEach(p => scene.remove(p.mesh));
+      particles.length = 0;
+    }
+
+    function cameraShake() {
+      // shake relativ la poziția de bază: camera nu mai "alunecă" la lovituri repetate
+      camera.position.x = CAMERA_BASE.x + (Math.random() - 0.5) * 0.55;
+      camera.position.y = CAMERA_BASE.y + (Math.random() - 0.5) * 0.22;
+
+      clearTimeout(cameraShake.timer);
+      cameraShake.timer = setTimeout(() => {
+        camera.position.x = CAMERA_BASE.x;
+        camera.position.y = CAMERA_BASE.y;
+      }, 75);
+    }
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1050);
+    }
+
+    function updateMission() {
+      const lang = t();
+      const displayScore = Math.floor(score);
+
+      let text = "";
+      let progress = 0;
+
+      if (activeMode === "story") {
+        if (runCoins < 10) {
+          text = lang.missions.story1(runCoins);
+          progress = runCoins / 10;
+        } else if (displayScore < 3500) {
+          text = lang.missions.story2(displayScore);
+          progress = displayScore / 3500;
+        } else {
+          text = lang.missions.story3;
+          progress = Math.min(1, ((runCoins / 25) + (displayScore / 6000)) / 2);
+        }
+      }
+
+      if (activeMode === "endless") {
+        text = lang.missions.endless(save.highScore);
+        progress = Math.min(1, displayScore / Math.max(save.highScore, 3000));
+      }
+
+      if (activeMode === "time") {
+        const left = Math.max(0, Math.ceil(75 - runTime));
+        text = lang.missions.time(left);
+        progress = runTime / 75;
+      }
+
+      if (activeMode === "challenge") {
+        text = lang.missions.challenge(obstaclesDodged);
+        progress = obstaclesDodged / 45;
+      }
+
+      if (activeMode === "boss") {
+        text = lang.missions.boss(Math.ceil(bossHealth));
+        progress = 1 - bossHealth / 100;
+      }
+
+      missionText.textContent = text;
+      missionFill.style.width = Math.max(0, Math.min(100, progress * 100)) + "%";
+    }
+
+    function updateHUD() {
+      scoreEl.textContent = Math.floor(score);
+      coinsEl.textContent = runCoins;
+      livesEl.textContent = lives;
+      shieldHud.textContent = shield + (shieldTimer > 0 ? "+" : "");
+      speedEl.textContent = (speed / baseSpeed).toFixed(1) + "x";
+      timeHud.textContent = Math.floor(runTime) + "s";
+      modeHud.textContent = modeLabel(activeMode);
+      comboHud.textContent = "x" + combo;
+      comboHud.classList.toggle("combo-hot", combo >= 10);
+      highHud.textContent = Math.max(save.highScore, Math.floor(score));
+    }
+
+    function endGame(success, title) {
+      // protecție: un singur final per cursă, chiar dacă mai multe
+      // condiții se declanșează în același frame
+      if (!gameRunning) return;
+
+      gameRunning = false;
+      paused = false;
+
+      const finalScore = Math.floor(score);
+      const earned = runCoins;
+      save.bankCoins += earned;
+      save.totalCoins += earned;
+      save.bestTime = Math.max(save.bestTime, Math.floor(runTime));
+      save.highScore = Math.max(save.highScore, finalScore);
+      save.bestCombo = Math.max(save.bestCombo || 0, bestCombo);
+
+      if (save.totalCoins >= 50) unlockAchievement("crystalHunter", false);
+      if (save.totalCoins >= 200) unlockAchievement("richRunner", false);
+
+      persistSave();
+
+      resultTitle.textContent = title;
+      finalText.textContent = t().results.final(
+        finalScore,
+        runCoins,
+        Math.floor(runTime),
+        save.highScore,
+        bestCombo
+      );
+
+      gameOver.classList.remove("hidden");
+      playTone(success ? 760 : 120, 0.18, success ? "triangle" : "sawtooth");
+      setTimeout(() => playTone(success ? 980 : 90, 0.22, success ? "triangle" : "sawtooth"), 160);
+
+      renderAchievements();
+      updateMenuInfo();
+    }
+
+    function unlockAchievement(key, withToast = true) {
+      if (save.achievements[key]) return;
+
+      save.achievements[key] = true;
+      persistSave();
+
+      if (withToast && achievementData[key]) {
+        showToast(t().toast.achievement(achievementData[key].name));
+      }
+    }
+
+    function updateMenuInfo() {
+      bankCoinsEl.textContent = save.bankCoins;
+    }
+
+    function playTone(freq = 440, duration = 0.08, type = "sine") {
+      if (muted) return;
+
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.frequency.value = freq;
+        osc.type = type;
+
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.055, audioCtx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration + 0.03);
+      } catch {}
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+  </script>
+</body>
+</html>
