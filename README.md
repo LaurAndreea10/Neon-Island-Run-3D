@@ -1,92 +1,124 @@
 # Neon Island Run 3D
 
-Neon Island Run 3D is a browser-based neon arcade runner built for GitHub Pages and portfolio presentation.
+**Neon Island Run 3D** is a browser-based neon arcade runner designed for GitHub Pages and portfolio presentation. The game uses a canvas-based pseudo-3D perspective, tuned speed, wider lanes, fairer obstacle spacing, mission feedback, bilingual UI and local high score saving.
+
+**Neon Island Run 3D** este un runner arcade neon pentru browser, creat pentru GitHub Pages și portofoliu. Jocul folosește perspectivă pseudo-3D pe canvas, viteză echilibrată, benzi mai late, obstacole mai rare, misiuni, interfață bilingvă și salvare locală pentru high score.
+
+---
 
 ## Live Demo
 
+Add your GitHub Pages link here after publishing:
+
+```txt
 https://laurandreea10.github.io/Neon-Island-Run-3D/
+```
 
-## What is included
+---
 
-The project now includes the missing game structure:
+## Features / Funcționalități
 
-- Moduri de joc
-- Shop
-- Skin-uri
-- Achievements
-- Control
-- Story Mode with progressive chapters
+- RO / EN language toggle
+- Tuned speed for better playability
+- Wider lanes and more reaction time
+- Story, Endless, Time Attack, Challenge and Boss modes
+- How to Play / Controls section
+- Loading screen
+- Level Complete feedback
+- New Record feedback
+- Local high score with `localStorage`
+- Desktop controls and mobile touch controls
+- Neon pseudo-3D canvas scene
+- Portfolio-ready UI sections: Modes, Shop, Skins, Achievements, Story, Controls
+
+---
 
 ## Game Modes
 
 ### Story Mode
-Progressive chapters: tutorial, obstacles, speed and boss.
-
-- Balanced
-- 3 lives
-- Play Story
+A balanced mode with friendly speed. Complete the level by collecting crystals or reaching the score goal.
 
 ### Endless Mode
-Infinite runner focused on the highest possible record.
-
-- High Score
-- Infinite
-- Play Endless
+An infinite runner focused on high score.
 
 ### Time Attack
-75 seconds to collect as many crystals as possible.
-
-- 75s
-- Fast
-- Play Time Attack
+A 90-second score and crystal challenge.
 
 ### Challenge Mode
-Special mission: survive with fewer mistakes.
-
-- Hard
-- Skill
-- Play Challenge
+A harder mode with fewer lives, but tuned obstacle spacing.
 
 ### Boss Mode
-Crystals and boosts reduce the boss energy. Attack by collecting.
+Collect crystals to drain the boss energy and complete the level.
 
-- Boss
-- Epic
-- Play Boss
+---
 
-## Other Sections
+## Controls / Control
 
-### Shop
-Includes boost concepts such as Magnet Boost, Shield Bubble and Neon Dash.
+### Desktop
 
-### Skins
-Includes Runner Cyan, Pink Comet and Golden Islander.
+- `←` / `A` — move left
+- `→` / `D` — move right
+- `Space` / `↑` / `W` — jump
+- `P` — pause
 
-### Achievements
-Includes First Run, Crystal Hunter and Boss Breaker.
+### Mobile
 
-### Controls
-Desktop and mobile controls are included:
+- Tap the on-screen buttons
+- Swipe left or right to change lanes
+- Tap to jump
 
-- Arrow left / right or swipe to change lane
-- Space / arrow up to jump
-- P or pause button to pause
-- Touch buttons for mobile
+---
 
-## Built With
+## Tech Stack
 
 - HTML5
 - CSS3
-- Canvas API
 - Vanilla JavaScript
+- Canvas API
+- LocalStorage
 - GitHub Pages
 
-## Local Usage
+---
 
-Clone the repository and open index.html in a browser.
+## What makes it portfolio-ready?
 
-Repository: https://github.com/LaurAndreea10/Neon-Island-Run-3D
+This project demonstrates:
+
+- UI/UX thinking for playability tuning
+- Responsive browser game design
+- Canvas rendering logic
+- Game state management
+- Local persistence
+- Bilingual interface architecture
+- Accessible live status text
+- Product-style presentation through sections and feature cards
+
+---
+
+## RO — Descriere pentru portofoliu
+
+**Neon Island Run 3D** este un runner arcade neon bilingv, construit cu HTML, CSS și JavaScript. Include moduri de joc, viteză ajustată pentru jucabilitate, obstacole mai bine spațiate, control desktop/mobil, ecran de loading, How to Play, feedback pentru Level Complete și New Record, plus salvare locală pentru high score.
+
+---
+
+## EN — Portfolio description
+
+**Neon Island Run 3D** is a bilingual neon arcade runner built with HTML, CSS and JavaScript. It features multiple game modes, tuned speed for better playability, fairer obstacle spacing, desktop/mobile controls, loading screen, How to Play, Level Complete and New Record feedback, plus local high score saving.
+
+---
+
+## Roadmap
+
+- Add real 3D objects with Three.js
+- Add sound effects and mute toggle
+- Add unlockable skins
+- Add a real shop system
+- Add difficulty selector
+- Add accessibility options: high contrast and reduced motion
+- Add screenshot preview in README
+
+---
 
 ## Author
 
-Created by Laura Andreea.
+Created by **Laura Andreea** as a creative front-end / arcade portfolio project.
