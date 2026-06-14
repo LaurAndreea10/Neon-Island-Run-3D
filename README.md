@@ -8,28 +8,47 @@
 
 ## Live Demo
 
-Add your GitHub Pages link here after publishing:
+After enabling GitHub Pages, the game should be available at:
 
 ```txt
 https://laurandreea10.github.io/Neon-Island-Run-3D/
 ```
 
+### GitHub Pages setup
+
+1. Open the repository settings.
+2. Go to **Pages**.
+3. Select **Deploy from a branch**.
+4. Choose branch: `main`.
+5. Choose folder: `/root`.
+6. Save.
+
+The project already includes:
+
+- `index.html` — the playable game
+- `.nojekyll` — prevents Jekyll processing issues
+- `404.html` — fallback redirect to the game
+
 ---
 
-## Features / Funcționalități
+## Latest implemented version
+
+This version includes:
 
 - RO / EN language toggle
-- Tuned speed for better playability
-- Wider lanes and more reaction time
-- Story, Endless, Time Attack, Challenge and Boss modes
-- How to Play / Controls section
 - Loading screen
+- How to Play section
 - Level Complete feedback
 - New Record feedback
+- Tuned speed for better playability
+- Wider lanes and more reaction time
+- Slower obstacle spawn
+- Story, Endless, Time Attack, Challenge and Boss modes
+- Time Attack set to 90 seconds
 - Local high score with `localStorage`
-- Desktop controls and mobile touch controls
-- Neon pseudo-3D canvas scene
-- Portfolio-ready UI sections: Modes, Shop, Skins, Achievements, Story, Controls
+- Desktop keyboard controls
+- Mobile touch and swipe controls
+- GitHub Pages fallback page
 
 ---
 
@@ -92,6 +111,7 @@ This project demonstrates:
 - Bilingual interface architecture
 - Accessible live status text
 - Product-style presentation through sections and feature cards
+- GitHub Pages readiness
 
 ---
 
